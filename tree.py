@@ -5,16 +5,7 @@ import re
 import webbrowser
 
 global_url = "https://www9.gogoanime.io/"
-
-class _GetchWindows:
-    def __init__(self):
-        import msvcrt
-
-    def __call__(self):
-        import msvcrt
-        return msvcrt.getch()
     
-
 class crawler:
     def __init__(self,head_link,link,critical_level,parent = None,level=0,threads=[],children=[]):
         self.parent = parent
@@ -180,7 +171,7 @@ def command_line_watch():
             my_link = write_to_file(my_episode[0])
             final_link = my_link.split("//")[-1]
             print(final_link)
-            webbrowser.open_new(final_link)
+            webbrowser.open("https://"+final_link)
             resp = input("Want to watch next? Type y/n:")
             if resp == 'n':
                 break
