@@ -5,47 +5,6 @@ import re
 import webbrowser
 
 global_url = "https://www9.gogoanime.io/"
-    
-class crawler:
-    def __init__(self,head_link,link,critical_level,parent = None,level=0,threads=[],children=[]):
-        self.parent = parent
-        self.level = level
-        self.threads = threads
-        self.children = children
-        self.link = link
-        self.head_link = head_link
-        self.critical_level =critical_level
-        
-    def navigate(self):
-        global all_anime
-        my_link_opened =BeautifulSoup(requests.get(self.link).text,"html.parser")
-        print("SELF LINK:" + "*******"+ self.link+"SElf level"+str(self.level))
-        if self.level < self.critical_level:
-            if re.search("\d+$",self.link):
-                write_to_file(self.link)
-            else:
-                all_links = my_link_opened.findAll("a")
-                for my_link in all_links:
-                    page_link = my_link.get("href")
-                    if page_link != None:
-                        if page_link.find(self.head_link)== -1:
-                            page_link = self.head_link + page_link
-                        if self.parent == None:
-                            if page_link in all_anime:
-                                child = crawler(parent=self,level=self.level+1,head_link = self.head_link,link = page_link,critical_level = self.critical_level)
-                                self.children.append(child)
-                        else:
-                            fragment = self.link.split("/")[-1]
-                            if fragment in page_link:
-                                child = crawler(parent=self,level=self.level+1,head_link = self.head_link,link = page_link,critical_level = self.critical_level)
-                                self.children.append(child)
-                for child in self.children:
-                    my_thread = threading.Thread(target=child.navigate,args=())
-                    self.threads.append(my_thread)
-                for thread in self.threads:
-                    thread.start()
-                    thread.join()
-
 
 def write_to_file(link):
      my_link_opened =BeautifulSoup(requests.get(link).text,"html.parser")
