@@ -107,7 +107,14 @@ def prepare_master_file():
         for episode in all_episodes:
             print("EPISODE:"+episode)
             write_to_file(episode)
+
+def save_anime_list():
+    all_anime = get_ALL_anime_list()
+    for anime in all_anime:
+        temp_file = open("all_animes.txt","a")
+        temp_file.write(anime)
+        temp_file.close()
+        
             
             
-            
-prepare_master_file()
+save_anime_list()
