@@ -2,8 +2,19 @@ import requests
 from bs4 import BeautifulSoup
 import threading
 import re
+import webbrowser
 
 global_url = "https://www9.gogoanime.io/"
+
+class _GetchWindows:
+    def __init__(self):
+        import msvcrt
+
+    def __call__(self):
+        import msvcrt
+        return msvcrt.getch()
+    
+
 class crawler:
     def __init__(self,head_link,link,critical_level,parent = None,level=0,threads=[],children=[]):
         self.parent = parent
@@ -58,6 +69,7 @@ def write_to_file(link):
         file = open("master_link_file.txt","a")
         file.write(final_link + "\n")
         file.close()
+        return final_link
                                 
 def get_anime_list(url):
     global global_url
@@ -96,7 +108,38 @@ def get_all_episodes(url):
         temp_url = episode_url + str(i)
         episode_url_list.append(temp_url)
     return episode_url_list
-    
+
+def num_of_episodes(url):
+    global global_url
+    my_main_page = BeautifulSoup(requests.get(url).text,"html.parser")
+    episode_url = global_url+url.split("/")[-1]+"-episode-"
+    my_list = my_main_page.findAll("ul",{"id":"episode_page"})[0]
+    my_lists = my_list.findAll("a")
+    episode_url_list = []
+    largest = 0
+    for item in my_lists:
+        num = int(item.get("ep_end"))
+        if num > largest:
+            largest = num
+    return largest
+
+def get_single_episode(url,episode_num):
+    global global_url
+    my_main_page = BeautifulSoup(requests.get(url).text,"html.parser")
+    episode_url = global_url+url.split("/")[-1]+"-episode-"
+    my_list = my_main_page.findAll("ul",{"id":"episode_page"})[0]
+    my_lists = my_list.findAll("a")
+    largest = 0
+    ret_file = []
+    for item in my_lists:
+        num = int(item.get("ep_end"))
+        if num > largest:
+            largest = num
+    if episode_num > largest:
+        ret_file.append("Sorry, the episode is not yet available!")
+    else:
+        ret_file.append(episode_url+str(episode_num))
+    return ret_file
        
         
 def prepare_master_file():
@@ -112,9 +155,45 @@ def save_anime_list():
     all_anime = get_ALL_anime_list()
     for anime in all_anime:
         temp_file = open("all_animes.txt","a")
-        temp_file.write(anime)
+        temp_file.write(anime+ "\n")
         temp_file.close()
+           
         
+def command_line_watch():
+    anime_name = input("Please enter the anime name (example:one-piece). Mind the dash(-) sign:")
+    match_dict=[]
+    f=open("all_animes.txt","r")
+    found = False
+    for line in f:
+        if anime_name in line:
+            match_dict.append(line)
+            found = True
+    f.close()
+    if found:
+        for i in range(len(match_dict)):
+            print(str(i+1) + "--->" + match_dict[i])
+        selection = int(input("Please select your option:"))-1
+        num = str(num_of_episodes(match_dict[selection]))
+        choice = int(input("There are "  + num + " episodes for "+ match_dict[selection] +"Please type the episode number:"))
+        while True:
+            my_episode = get_single_episode(match_dict[selection].rstrip(),choice)
+            my_link = write_to_file(my_episode[0])
+            final_link = my_link.split("//")[-1]
+            print(final_link)
+            webbrowser.open_new(final_link)
+            resp = input("Want to watch next? Type y/n:")
+            if resp == 'n':
+                break
+            else:
+                choice += 1
+                if choice > int(num):
+                    break
             
-            
-save_anime_list()
+    else:
+        print("No match found! Try researching for shorter string")
+    
+    
+    
+        
+if __name__ == "__main__":
+    command_line_watch()
