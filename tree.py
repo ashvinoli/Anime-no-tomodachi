@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import threading
 import re
 import webbrowser
+import os
 
 global_url = "https://www9.gogoanime.io/"
 
@@ -110,37 +111,75 @@ def save_anime_list():
            
         
 def command_line_watch():
-    anime_name = input("Please enter the anime name (example:one-piece). Mind the dash(-) sign:")
-    match_dict=[]
-    f=open("all_animes.txt","r")
-    found = False
-    for line in f:
-        if anime_name in line:
-            match_dict.append(line)
-            found = True
-    f.close()
-    if found:
-        for i in range(len(match_dict)):
-            print(str(i+1) + "--->" + match_dict[i])
-        selection = int(input("Please select your option:"))-1
-        num = str(num_of_episodes(match_dict[selection]))
-        choice = int(input("There are "  + num + " episodes for "+ match_dict[selection] +"Please type the episode number:"))
-        while True:
-            my_episode = get_single_episode(match_dict[selection].rstrip(),choice)
-            my_link = write_to_file(my_episode[0])
-            final_link = my_link.split("//")[-1]
-            print(final_link)
-            webbrowser.open("https://"+final_link)
-            resp = input("Want to watch next? Type y/n:")
-            if resp == 'n':
-                break
-            else:
-                choice += 1
-                if choice > int(num):
-                    break
-            
-    else:
-        print("No match found! Try researching for shorter string")
+     while True:
+         os.system("cls")
+         print("NOTE: IF YOU WANT TO SKIP ANY TYPING OR QUESTION JUST PRESS \"ENTER\" KEY.\nBUT DONOT PRESS ENTER FOR THIS FIRST QUESTION!\n")
+         anime_name = input("Please enter the anime name (example:one-piece). Mind the dash(-) sign:")
+         match_dict=[]
+         f=open("all_animes.txt","r")
+         found = False
+         for line in f:
+             if anime_name in line:
+                 match_dict.append(line)
+                 found = True
+         f.close()
+
+
+         if found:
+             for i in range(len(match_dict)):
+                 print(str(i+1) + "--->" + match_dict[i])
+             while True:
+                  selection = input("Please select your option among the SEARCHED RESULTS:")
+                  if selection.isnumeric():
+                       selection = int(selection)-1
+                       if selection > len(match_dict)-1 or selection < 0:
+                            resp = input("Your selection is not available! Make reselection? Type y/n:")
+                            if resp != "y":
+                                 break
+                       else:
+                            num = str(num_of_episodes(match_dict[selection]))
+                            while True:
+                                choice = input("There are "  + num + " episodes for "+ match_dict[selection] +"Please type the episode number:")
+                                if choice.isnumeric():
+                                     choice = int(choice)
+                                     if choice > int(num) or choice < 1:
+                                          print("Sorry, the episode you requested is not available yet!")
+                                          resp = input("Want to see another episode? Type y/n:")
+                                          if resp != "y":
+                                               break
+                                     else:
+                                          while True:
+                                               if choice > int(num):
+                                                     print("Sorry, we are now out of episodes!")
+                                                     break
+                                               my_episode = get_single_episode(match_dict[selection].rstrip(),choice)
+                                               my_link = write_to_file(my_episode[0])
+                                               final_link = my_link.split("//")[-1]
+                                               print(final_link)
+                                               webbrowser.open("https://"+final_link)
+                                               resp = input("Want to watch next? Type y/n:")
+                                               if resp != 'y':
+                                                   break
+                                               else:
+                                                   choice += 1
+                                else:
+                                      resp=input("Invalid option input. Reinput? Type y/n:")
+                                      if resp != "y":
+                                           break
+                                     
+                  else:
+                       resp=input("Invalid option input. Reinput? Type y/n:")
+                       if resp != "y":
+                            break
+                                 
+         else:
+             print("No match found! Try researching for shorter string")
+
+         retry = input("Research for another anime? y/n:")
+         if retry != "y":
+                  break
+     
+        
     
     
     
