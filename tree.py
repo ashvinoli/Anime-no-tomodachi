@@ -202,7 +202,8 @@ def stream_video(video_chunks):
                     if my_program != None:
                          poll = my_program.poll()
                          if poll != None: #if poll is none then my program is still running
-                              os.remove("temp_vid.mp4")
+                              if os.path.exists("temp_vid.mp4"):
+                                    os.remove("temp_vid.mp4")
                               return
                     f = open("temp_vid.mp4","ab")
                     if piece:
