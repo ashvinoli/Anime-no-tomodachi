@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import re
 import webbrowser
 import os
+import subprocess
+import time
 
 global_url = "https://www9.gogoanime.io/"
 headers = {"Referrer Policy":"unsafe-url",\
@@ -70,7 +72,6 @@ def num_of_episodes(url):
     episode_url = global_url+url.split("/")[-1]+"-episode-"
     my_list = my_main_page.findAll("ul",{"id":"episode_page"})[0]
     my_lists = my_list.findAll("a")
-    episode_url_list = []
     largest = 0
     for item in my_lists:
         num = int(item.get("ep_end"))
@@ -114,6 +115,7 @@ def save_anime_list():
         temp_file.close()
 
 def get_playlist_m3u8(end_url):
+     #returns the main m3u8
      my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
      try:
           m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
@@ -122,6 +124,7 @@ def get_playlist_m3u8(end_url):
      return m3u8
 
 def get_child_m3u8(playlist_m3u8):
+     #returns the qualities available
      head_url = playlist_m3u8.split("/")[2]
      head_url = "https://" + head_url
      global headers
@@ -146,6 +149,7 @@ def get_child_m3u8(playlist_m3u8):
      return m3u8
 
 def provide_video_chunks(video_m3u8):
+     #returns the video chunks for the quality selected
      global headers
      chunks = []
      head_url = video_m3u8.split("/")[2]
@@ -165,16 +169,52 @@ def download_chunk(url):
      global headers
      return requests.get(url,headers=headers).content
 
-def save_video(video_chunks):
+def watch_video(end_url):
+     global mythreads
+     my_playlist = get_child_m3u8(get_playlist_m3u8(end_url))
+     index = 1
+     length = len(my_playlist)
+     if length != 0:
+          for _ in my_playlist:
+               print(str(index) + "----->"+ _[0])
+               index += 1
+          while True:
+               resp = input("Choose the quality of video:")
+               if resp.isnumeric() and int(resp) <= length and int(resp) >= 1:
+                    my_quality_video = provide_video_chunks(my_playlist[int(resp)-1][1])
+                    stream_video(my_quality_video)
+                    break
+               else:
+                    resp = input("Bad quality!!!!!! Re-enter quality y/n?")
+                    if resp != "y":
+                         break
+                    
+                    
+def stream_video(video_chunks):
+     index = 0
+     vlc_opened = False
+     my_program = None #instantiating to store the subprocess variable
      for chunk in video_chunks:
-          print(chunk)
-          temp = open("temp_vid.mp4","ab")
-          my_chunk = download_chunk(chunk)
-          temp.write(my_chunk)
-          temp.close()
+          #print(chunk)
+          with requests.get(chunk, stream=True,headers = headers) as r:
+               r.raise_for_status()
+               for piece in r.iter_content(chunk_size=8192):
+                    if my_program != None:
+                         poll = my_program.poll()
+                         if poll != None: #if poll is none then my program is still running
+                              os.remove("temp_vid.mp4")
+                              return
+                    f = open("temp_vid.mp4","ab")
+                    if piece:
+                         f.write(piece)
+                         f.close()
+                         if not vlc_opened:
+                              my_program = subprocess.Popen(["vlc","temp_vid.mp4"])
+                              vlc_opened = True
 
-        
+               
 def command_line_watch():
+     global my_threads
      while True:
          os.system("cls")
          print("NOTE: IF YOU WANT TO SKIP ANY TYPING OR QUESTION JUST PRESS \"ENTER\" KEY.\nBUT DONOT PRESS ENTER FOR THIS FIRST QUESTION!\n")
@@ -217,8 +257,11 @@ def command_line_watch():
                                                my_episode = get_single_episode(match_dict[selection].rstrip(),choice)
                                                my_link = write_to_file(my_episode[0])
                                                final_link = my_link.split("//")[-1]
+                                               final_link = "https://"+final_link
                                                print(final_link)
-                                               webbrowser.open_new("https://"+final_link)
+                                               watch_video(final_link)
+                                               #print(final_link)
+                                               #webbrowser.open_new(final_link)
                                                resp = input("Want to watch next? Type y/n:")
                                                if resp != 'y':
                                                    break
@@ -242,13 +285,7 @@ def command_line_watch():
                   break
      
 if __name__ == "__main__":
-    x = get_playlist_m3u8("https://vidstreaming.io/streaming.php?id=MjMyNjI=&title=Hunter+X+Hunter+Episode+58")
-    print(x)
-    y = get_child_m3u8(x)
-    if len(y)!=0:
-         z = provide_video_chunks(y[0][1])
-         save_video(z)
-         
-              
-    #command_line_watch()
+   command_line_watch()
+   if os.path.exists("temp_vid.mp4"):
+        os.remove("temp_vid.mp4")
     
