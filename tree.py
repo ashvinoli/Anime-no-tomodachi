@@ -1,11 +1,15 @@
 import requests
 from bs4 import BeautifulSoup
-import threading
 import re
 import webbrowser
 import os
 
 global_url = "https://www9.gogoanime.io/"
+headers = {"Referrer Policy":"unsafe-url",\
+                  "Origin":"https://vidstreaming.io",\
+                  "Referer":"https://vidstreaming.io/",\
+                  "Sec-Fetch-Mode":"cors",\
+                  "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
 
 def write_to_file(link):
      my_link_opened =BeautifulSoup(requests.get(link).text,"html.parser")
@@ -109,16 +113,66 @@ def save_anime_list():
         temp_file.write(anime+ "\n")
         temp_file.close()
 
-def get_head_m3u8(end_url):
+def get_playlist_m3u8(end_url):
      my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
      try:
           m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
      except:
           m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
      return m3u8
-     
-      
-     
+
+def get_child_m3u8(playlist_m3u8):
+     head_url = playlist_m3u8.split("/")[2]
+     head_url = "https://" + head_url
+     global headers
+     if head_url == "https://hls10x.cdnfile.info":
+          headers_new = {  "Origin":"https://vidstreaming.io",\
+                       "Referrer":"https://vidstreaming.io/",\
+                       "Referrer Policy":"origin",\
+                       "Sec-Fetch-Mode":"cors",\
+                       "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
+          temp_m3 = requests.get(playlist_m3u8,headers = headers_new)
+     else:
+          temp_m3 = requests.get(playlist_m3u8,headers = headers)
+     m3u8 = []
+     #print(temp_m3.text)
+     lines = temp_m3.text.split("\n")
+     for i in range(len(lines)):
+          resolution = []
+          if re.search("\d+x\d+",lines[i]):
+               resolution.append(re.search("\d+x\d+",lines[i]).group(0))
+               resolution.append(head_url+lines[i+1])
+               m3u8.append(resolution)      
+     return m3u8
+
+def provide_video_chunks(video_m3u8):
+     global headers
+     chunks = []
+     head_url = video_m3u8.split("/")[2]
+     head_url = "https://" + head_url
+     temp_m3 = requests.get(video_m3u8,headers=headers)
+     all_lines = temp_m3.text.split("\n")
+     bits_extracted_prev = ""
+     for line in all_lines:
+        if re.match("^/",line):
+             bits_extracted_new = line.split(".")[-2].split("-")[-1]
+             if bits_extracted_new != bits_extracted_prev:
+                  chunks.append(head_url+line)
+                  bits_extracted_prev = bits_extracted_new
+     return chunks
+                  
+def download_chunk(url):
+     global headers
+     return requests.get(url,headers=headers).content
+
+def save_video(video_chunks):
+     for chunk in video_chunks:
+          print(chunk)
+          temp = open("temp_vid.mp4","ab")
+          my_chunk = download_chunk(chunk)
+          temp.write(my_chunk)
+          temp.close()
+
         
 def command_line_watch():
      while True:
@@ -188,4 +242,13 @@ def command_line_watch():
                   break
      
 if __name__ == "__main__":
-    print(get_head_m3u8("https://vidstreaming.io/streaming.php?id=NDYxNTQ=&title=One+Piece+3D2Y+Episode+1"))
+    x = get_playlist_m3u8("https://vidstreaming.io/streaming.php?id=MjMyNjI=&title=Hunter+X+Hunter+Episode+58")
+    print(x)
+    y = get_child_m3u8(x)
+    if len(y)!=0:
+         z = provide_video_chunks(y[0][1])
+         save_video(z)
+         
+              
+    #command_line_watch()
+    
