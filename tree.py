@@ -108,7 +108,17 @@ def save_anime_list():
         temp_file = open("all_animes.txt","a")
         temp_file.write(anime+ "\n")
         temp_file.close()
-           
+
+def get_head_m3u8(end_url):
+     my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
+     try:
+          m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
+     except:
+          m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
+     return m3u8
+     
+      
+     
         
 def command_line_watch():
      while True:
@@ -123,8 +133,6 @@ def command_line_watch():
                  match_dict.append(line)
                  found = True
          f.close()
-
-
          if found:
              for i in range(len(match_dict)):
                  print(str(i+1) + "--->" + match_dict[i])
@@ -156,7 +164,7 @@ def command_line_watch():
                                                my_link = write_to_file(my_episode[0])
                                                final_link = my_link.split("//")[-1]
                                                print(final_link)
-                                               webbrowser.open("https://"+final_link)
+                                               webbrowser.open_new("https://"+final_link)
                                                resp = input("Want to watch next? Type y/n:")
                                                if resp != 'y':
                                                    break
@@ -179,10 +187,5 @@ def command_line_watch():
          if retry != "y":
                   break
      
-        
-    
-    
-    
-        
 if __name__ == "__main__":
-    command_line_watch()
+    print(get_head_m3u8("https://vidstreaming.io/streaming.php?id=NDYxNTQ=&title=One+Piece+3D2Y+Episode+1"))
