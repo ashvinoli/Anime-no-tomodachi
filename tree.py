@@ -170,7 +170,6 @@ def download_chunk(url):
      return requests.get(url,headers=headers).content
 
 def watch_video(end_url):
-     global mythreads
      my_playlist = get_child_m3u8(get_playlist_m3u8(end_url))
      index = 1
      length = len(my_playlist)
@@ -191,9 +190,11 @@ def watch_video(end_url):
                     
                     
 def stream_video(video_chunks):
+     if os.path.exists("temp_vid.mp4"):
+        os.remove("temp_vid.mp4")
      index = 0
      vlc_opened = False
-     my_program = None #instantiating to store the subprocess variable
+     my_program = None
      for chunk in video_chunks:
           #print(chunk)
           with requests.get(chunk, stream=True,headers = headers) as r:
@@ -215,7 +216,6 @@ def stream_video(video_chunks):
 
                
 def command_line_watch():
-     global my_threads
      while True:
          os.system("cls")
          print("NOTE: IF YOU WANT TO SKIP ANY TYPING OR QUESTION JUST PRESS \"ENTER\" KEY.\nBUT DONOT PRESS ENTER FOR THIS FIRST QUESTION!\n")
