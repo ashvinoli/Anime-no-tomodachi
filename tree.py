@@ -13,6 +13,14 @@ headers = {"Referrer Policy":"unsafe-url",\
                   "Sec-Fetch-Mode":"cors",\
                   "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
 
+
+def internet_on():
+    try:
+        x = requests.get("https://google.com")
+        return True
+    except:
+        return False
+
 def write_to_file(link):
      my_link_opened =BeautifulSoup(requests.get(link).text,"html.parser")
      iframes = my_link_opened.findAll("iframe")
@@ -286,7 +294,13 @@ def command_line_watch():
                   break
      
 if __name__ == "__main__":
-   command_line_watch()
-   if os.path.exists("temp_vid.mp4"):
-        os.remove("temp_vid.mp4")
+      connection = internet_on()
+      if connection:
+           command_line_watch()
+           if os.path.exists("temp_vid.mp4"):
+                os.remove("temp_vid.mp4")
+      else:
+           print("Please Check your internet connection and try again!")
+                
+    
     
