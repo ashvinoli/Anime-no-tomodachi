@@ -13,7 +13,7 @@ headers = {"Referrer Policy":"unsafe-url",\
                   "Sec-Fetch-Mode":"cors",\
                   "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
 
-
+default_mode = None
 def internet_on():
     try:
         x = requests.get("https://google.com")
@@ -177,26 +177,49 @@ def download_chunk(url):
      global headers
      return requests.get(url,headers=headers).content
 
+def quality_selection(my_playlist):
+    #This function prompts the user to select quality
+    global default_mode
+    index = 1
+    length = len(my_playlist)
+    for _ in my_playlist:
+        print(str(index) + "----->"+ _[0])
+        index += 1
+    while True:
+        resp = input("Choose the quality of video:")
+        if resp.isnumeric() and int(resp) <= length and int(resp) >= 1:
+            my_quality_video = provide_video_chunks(my_playlist[int(resp)-1][1])
+            ans = input("Do you want to keep it as default quality for the next videos? Type y/n:")
+            if ans == "y":
+                default_mode = my_playlist[int(resp)-1][0]
+                stream_video(my_quality_video)
+                break
+        else:
+            resp = input("Bad quality!!!!!! Re-enter quality y/n?")
+            if resp != "y":
+                break
+    
 def watch_video(end_url):
-     my_playlist = get_child_m3u8(get_playlist_m3u8(end_url))
-     index = 1
-     length = len(my_playlist)
-     if length != 0:
-          for _ in my_playlist:
-               print(str(index) + "----->"+ _[0])
-               index += 1
-          while True:
-               resp = input("Choose the quality of video:")
-               if resp.isnumeric() and int(resp) <= length and int(resp) >= 1:
-                    my_quality_video = provide_video_chunks(my_playlist[int(resp)-1][1])
+    global default_mode
+    my_playlist = get_child_m3u8(get_playlist_m3u8(end_url))
+    matched = False
+    length = len(my_playlist)
+    if length != 0:
+        if default_mode == None:
+            quality_selection(my_playlist)
+        else:
+            for _ in my_playlist:
+                if _[0] == default_mode:
+                    my_quality_video = provide_video_chunks(_[1])
                     stream_video(my_quality_video)
+                    matched = True
                     break
-               else:
-                    resp = input("Bad quality!!!!!! Re-enter quality y/n?")
-                    if resp != "y":
-                         break
-     else:
-         print("Sorry, the video you requested is currently not available! Will fix this problem soon!") #This problem is caused by the alternate hls10x site
+            if not matched:
+                default_mode = None
+                print("Sorry, your default quality is unavailable for this video. So please select quality again.")
+                quality_selection(my_playlist)         
+    else:
+        print("Sorry, the video you requested is currently not available! Will fix this problem soon!") #This problem is caused by the alternate hls10x site
                     
                     
 def stream_video(video_chunks):
