@@ -7,3 +7,8 @@ Install Dependencies. Add vlc to PATH and-
 ```
 python tree.py
 ```
+# Common Error messages
+'''
+PermissionError: [Errno 13] Permission denied: 'temp_vid.mp4'
+'''
+This error occurs because VLC media player started slower in your system. Restart the program and it will disappear as VLC will only start slowly at the first instance. I will fix it as soon as possible 
