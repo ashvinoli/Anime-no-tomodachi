@@ -7,7 +7,7 @@ Install Dependencies. Add vlc to PATH and-
 ```
 python tree.py
 ```
-# Common Error messages
+## Common Error messages
 ```
 PermissionError: [Errno 13] Permission denied: 'temp_vid.mp4'
 ```
