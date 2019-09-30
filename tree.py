@@ -195,6 +195,8 @@ def watch_video(end_url):
                     resp = input("Bad quality!!!!!! Re-enter quality y/n?")
                     if resp != "y":
                          break
+     else:
+         print("Sorry, the video you requested is currently not available! Will fix this problem soon!") #This problem is caused by the alternate hls10x site
                     
                     
 def stream_video(video_chunks):
