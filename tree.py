@@ -14,12 +14,6 @@ headers = {"Referrer Policy":"unsafe-url",\
                   "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
 
 default_mode = None
-def internet_on():
-    try:
-        x = requests.get("https://google.com")
-        return True
-    except requests.ConnectionError:
-        return False
 
 def write_to_file(link):
      my_link_opened =BeautifulSoup(requests.get(link).text,"html.parser")
@@ -300,13 +294,16 @@ def command_line_watch():
                   break
      
 if __name__ == "__main__":
-      connection = internet_on()
-      if connection:
-           command_line_watch()
-           if os.path.exists("temp_vid.mp4"):
-                os.remove("temp_vid.mp4")
-      else:
-           print("Please Check your internet connection and try again!")
+     # connection = internet_on()
+     # if connection:
+     #      command_line_watch()
+     #      if os.path.exists("temp_vid.mp4"):
+     #           os.remove("temp_vid.mp4")
+     # else:
+     #      print("Please Check your internet connection and try again!")
                 
-    
+    try:
+        command_line_watch()
+    except:
+        print("Some error occured!!!! I have no idea what type, perhaps you might want to see your internet connection")
     
