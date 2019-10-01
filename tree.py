@@ -293,15 +293,7 @@ def command_line_watch():
          if retry != "y":
                   break
      
-if __name__ == "__main__":
-     # connection = internet_on()
-     # if connection:
-     #      command_line_watch()
-     #      if os.path.exists("temp_vid.mp4"):
-     #           os.remove("temp_vid.mp4")
-     # else:
-     #      print("Please Check your internet connection and try again!")
-                
+if __name__ == "__main__":            
     try:
         command_line_watch()
     except:
