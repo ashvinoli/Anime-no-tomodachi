@@ -5,12 +5,12 @@ During VLC play, the play might end after a few seconds, that is because the dow
 ## Usage
 Please used python 3.7 or higher if available. Install required libraries.
 To watch video:
--Add vlc to PATH and-
+* Add vlc to PATH and-
 ```
 python tree.py
 ```
 To download video:
--just type the following
+* Just type the following
 ```
 python download_module.py
 ```
