@@ -18,7 +18,7 @@ def internet_on():
     try:
         x = requests.get("https://google.com")
         return True
-    except:
+    except requests.ConnectionError:
         return False
 
 def write_to_file(link):
@@ -45,7 +45,6 @@ def get_anime_list(url):
         anime_list = dev.findAll("a")
         for anime in anime_list:
             all_anime.append(global_url+anime.get("href"))
-
     return all_anime
 
 def get_ALL_anime_list():
@@ -59,25 +58,14 @@ def get_ALL_anime_list():
 
 def get_all_episodes(url):
     global global_url
-    my_main_page = BeautifulSoup(requests.get(url).text,"html.parser")
-    episode_url = global_url+url.split("/")[-1]+"-episode-"
-    my_list = my_main_page.findAll("ul",{"id":"episode_page"})[0]
-    my_lists = my_list.findAll("a")
-    episode_url_list = []
-    largest = 0
-    for item in my_lists:
-        num = int(item.get("ep_end"))
-        if num > largest:
-            largest = num
+    largest = num_of_episodes(url)
     for i in range(1,largest+1):
-        temp_url = episode_url + str(i)
-        episode_url_list.append(temp_url)
+        episode_url_list.append(get_single_episode(url,i)[0])
     return episode_url_list
 
 def num_of_episodes(url):
     global global_url
     my_main_page = BeautifulSoup(requests.get(url).text,"html.parser")
-    episode_url = global_url+url.split("/")[-1]+"-episode-"
     my_list = my_main_page.findAll("ul",{"id":"episode_page"})[0]
     my_lists = my_list.findAll("a")
     largest = 0
@@ -89,16 +77,9 @@ def num_of_episodes(url):
 
 def get_single_episode(url,episode_num):
     global global_url
-    my_main_page = BeautifulSoup(requests.get(url).text,"html.parser")
     episode_url = global_url+url.split("/")[-1]+"-episode-"
-    my_list = my_main_page.findAll("ul",{"id":"episode_page"})[0]
-    my_lists = my_list.findAll("a")
-    largest = 0
+    largest = num_of_episodes(url)
     ret_file = []
-    for item in my_lists:
-        num = int(item.get("ep_end"))
-        if num > largest:
-            largest = num
     if episode_num > largest:
         ret_file.append("Sorry, the episode is not yet available!")
     else:
