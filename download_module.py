@@ -112,11 +112,10 @@ def download_chunks(video_chunks,anime_directory, episode_name):
         #print("% complete.")
         print("\r%d %% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
         index += 1
-    print("\n")
     append_them_all(length,anime_directory, episode_name,chunks)
 
 def append_them_all(length,anime_directory,episode_name, chunks):
-    print("Appending Pieces together......")
+    print("\nAppending Pieces together......")
     big_episode = anime_directory + "\\" + episode_name + ".mp4"
     big_file = open(big_episode,"wb")
     for i in range (1,length+1):
@@ -127,6 +126,7 @@ def append_them_all(length,anime_directory,episode_name, chunks):
         os.remove(chunk_name)
     big_file.close()
     print("Done appending. "+episode_name+" has been successfully downloaded!")
+    print("\n")
     
 
 def download_command_line():
