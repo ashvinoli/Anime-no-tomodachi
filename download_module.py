@@ -1,6 +1,8 @@
 from tree import *
 import pathlib
 import sys
+import time
+import math
 
 def video_quality_selection(my_playlist,anime_directory,episode_name):
     #This function prompts the user to select quality
@@ -77,6 +79,7 @@ def download_single_video(final_link,episode_link):
 def download_chunks(video_chunks,anime_directory, episode_name):
     chunks = anime_directory + "\\Chunks"
     index = 1
+    average_speed = math.inf
     global headers
     if not os.path.exists(chunks):
             pathlib.Path(chunks).mkdir(parents=True, exist_ok=True)
@@ -91,18 +94,25 @@ def download_chunks(video_chunks,anime_directory, episode_name):
         if not os.path.exists(chunk_name):
             chunk_file = open(chunk_name,"wb")
             try:
+                begin_time = time.time()
                 current_chunk = requests.get(chunk,headers = headers).content
+                end_time = time.time()
+                time_difference = end_time-begin_time
                 chunk_file.write(current_chunk)
                 chunk_file.close()
+                size = os.path.getsize(chunk_name)
+                average_speed = size/(1024*time_difference)
             except:
                 print("Error on chunk "+str(index))
                 chunk_file.close()
                 os.remove(chunk_name)
                 sys.exit() #Right now I can't think of any nice option other than terminating a program if any chunks fails to download because of some error
         percentage = int((index/length) * 100)
-        print(percentage,end="")
-        print("% complete.")
+        #print(percentage,end="")
+        #print("% complete.")
+        print("\r%d %% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
         index += 1
+    print("\n")
     append_them_all(length,anime_directory, episode_name,chunks)
 
 def append_them_all(length,anime_directory,episode_name, chunks):
