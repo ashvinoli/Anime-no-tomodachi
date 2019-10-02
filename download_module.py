@@ -4,12 +4,15 @@ import sys
 import time
 import math
 
+
+no_interruption_mode = False
 def video_quality_selection(my_playlist,anime_directory,episode_name):
     #This function prompts the user to select quality
     global default_mode
     chunks = anime_directory + "\\Chunks"
     index = 1
     length = len(my_playlist)
+    print("Video qualities available for "+ episode_name)
     for _ in my_playlist:
         print(str(index) + "----->"+ _[0])
         index += 1
@@ -34,6 +37,7 @@ def video_quality_selection(my_playlist,anime_directory,episode_name):
     
 def download_single_video(final_link,episode_link):
     global default_mode
+    global no_interruption_mode
     series_name = "-".join(episode_link.split("/")[-1].split("-")[:-2])
     episode_name = episode_link.split("/")[-1]
     program_path = os.path.dirname(os.path.realpath(__file__))
@@ -43,11 +47,12 @@ def download_single_video(final_link,episode_link):
         pathlib.Path(chunks).mkdir(parents=True, exist_ok=True)
         #default_mode = None 
     else:
-        quality = chunks + "\\quality.txt"
-        quality_file = open(quality,"r")
-        for _ in quality_file:
-            quality = _.rstrip()
-        default_mode = quality #NOTE if 1-6 like range are given and 1 file has been downloaded it will tip the default_mode to quality of 1 and further videos will be downloaded wih the same quality
+        if os.path.exists(chunks +"\\quality.txt"):
+            quality = chunks + "\\quality.txt"
+            quality_file = open(quality,"r")
+            for _ in quality_file:
+                quality = _.rstrip()
+                default_mode = quality #NOTE if 1-6 like range are given and 1 file has been downloaded it will tip the default_mode to quality of 1 and further videos will be downloaded wih the same quality
     if not os.path.exists(anime_directory):
             pathlib.Path(anime_directory).mkdir(parents=True, exist_ok=True)
     if not os.path.exists(anime_directory + "\\" + episode_name + ".mp4"):
@@ -68,9 +73,12 @@ def download_single_video(final_link,episode_link):
                         matched = True
                         break
                 if not matched:
-                    default_mode = None
-                    print("Sorry, your default quality is unavailable for this video. So please select quality again.")
-                    video_quality_selection(my_playlist,anime_directory, episode_name)         
+                    if no_interruption_mode:
+                        download_chunks(my_playlist[0][1],anime_directory,episode_name)
+                    else:
+                        default_mode = None
+                        print("Sorry, your default quality is unavailable for this video. So please select quality again.")
+                        video_quality_selection(my_playlist,anime_directory, episode_name)         
         else:
             print("Sorry, the video you requested is currently not available! Will fix this problem soon!") #This problem is caused by the alternate hls10x site
     else:
@@ -130,6 +138,7 @@ def append_them_all(length,anime_directory,episode_name, chunks):
     
 
 def download_command_line():
+    global no_interruption_mode
     while True:
         os.system("cls")
         print("NOTE: IF YOU WANT TO SKIP ANY TYPING OR QUESTION JUST PRESS \"ENTER\" KEY.\nBUT DONOT PRESS ENTER FOR THIS FIRST QUESTION!\n")
@@ -155,8 +164,12 @@ def download_command_line():
                             break
                     else:
                         num = str(num_of_episodes(match_dict[selection]))
+                        interruption = input("Do you want to turn no interruption mode on? If turned on, in this mode all videos in the range you provide will be downloaded with default settings and no queries from the user will be made during the download process. Type y/n:")
                         while True:
                             choice = input("There are "  + num + " episodes for "+ match_dict[selection] +"Type single number eg: 1 or 2 to download single episode, '1-5' to download range, 'A' or 'a' to download all episodes:")
+                            if interruption == "y":
+                                no_interruption_mode = True
+                        
                             if choice.isnumeric():
                                 choice = int(choice)
                                 if choice > int(num) or choice < 1:
