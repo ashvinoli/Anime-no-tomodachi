@@ -87,7 +87,7 @@ def download_chunks(video_chunks,anime_directory, episode_name):
     length = len(video_chunks)
     file_count = len([name for name in os.listdir(chunks)])
     #Code below had to be written to ensure that no incomeplete files exists. I resorted to it after  requests.head().headers.get() failed. Code below fails to check the last file chunk. File count also counts the quality file
-    if file_count >=2 and file_count < length+1: #length + 1 because of the quality file
+    if file_count >=2 and file_count <= length+1: #length + 1 because of the quality file
         os.remove(chunks+"\\"+"chunk_"+str(file_count-1)+".mp4")
     for chunk in video_chunks:
         chunk_name = chunks+"\\"+"chunk_"+str(index)+".mp4"
