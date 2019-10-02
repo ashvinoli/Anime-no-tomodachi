@@ -113,7 +113,7 @@ def download_chunks(video_chunks,anime_directory, episode_name):
             except:
                 print("Error on chunk "+str(index))
                 chunk_file.close()
-                os.remove(chunk_name)
+                #os.remove(chunk_name)
                 sys.exit() #Right now I can't think of any nice option other than terminating a program if any chunks fails to download because of some error
         percentage = int((index/length) * 100)
         #print(percentage,end="")
