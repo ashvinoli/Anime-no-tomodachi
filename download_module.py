@@ -5,7 +5,22 @@ import time
 import math
 
 
+
+repeat_mode = False
 no_interruption_mode = False
+
+interruption_response = None
+anime_name_response = None
+selection_response = None
+
+if len(sys.argv) == 1:
+    if os.path.exists("repeat.txt"):
+        if sys.argv[0] == "-r":
+            repeat_mode = True
+            repeat = open("repeat.txt","r")
+            
+            repeat.close()
+        
 def video_quality_selection(my_playlist,anime_directory,episode_name):
     #This function prompts the user to select quality
     global default_mode
@@ -143,23 +158,34 @@ def download_chunks(video_chunks,anime_directory, episode_name):
     if file_count >=2 and file_count <= length+1: #length + 1 because of the quality file
         os.remove(chunks+"\\"+"chunk_"+str(file_count-1)+".mp4")
     for chunk in video_chunks:
+        tries = 1
         chunk_name = chunks+"\\"+"chunk_"+str(index)+".mp4"
-        if not os.path.exists(chunk_name):
-            chunk_file = open(chunk_name,"wb")
-            try:
-                begin_time = time.time()
-                current_chunk = requests.get(chunk,headers = headers).content
-                end_time = time.time()
-                time_difference = end_time-begin_time
-                chunk_file.write(current_chunk)
-                chunk_file.close()
-                size = os.path.getsize(chunk_name)
-                average_speed = size/(1024*time_difference)
-            except:
-                print("Error on chunk "+str(index)+". Please consider redownloading episode "+episode_name)
-                chunk_file.close()
-                #os.remove(chunk_name)
-                return #Right now I can't think of any nice option other than terminating a program if any chunks fails to download because of some error
+        while True:
+            if not os.path.exists(chunk_name):
+                chunk_file = open(chunk_name,"wb")
+                try:
+                    begin_time = time.time()
+                    current_chunk = requests.get(chunk,headers = headers).content
+                    end_time = time.time()
+                    time_difference = end_time-begin_time
+                    chunk_file.write(current_chunk)
+                    chunk_file.close()
+                    size = os.path.getsize(chunk_name)
+                    average_speed = size/(1024*time_difference)
+                    break
+                except:
+                    chunk_file.close()
+                    if tries <= 5:
+                        print("\nError on chunk "+str(index)+". Retrying.... Attempt:"+str(tries))
+                        os.remove(chunk_name)
+                        tries += 1
+                    else:
+                        print("Error on chunk "+str(index)+". " + str(tries-1) +" downloading attempt failed! Continuing download for another episode. Please redownload " + episode_name)
+                        #os.remove(chunk_name)
+                        return
+            else:
+                break
+            
         percentage = int((index/length) * 100)
         #print(percentage,end="")
         #print("% complete.")
