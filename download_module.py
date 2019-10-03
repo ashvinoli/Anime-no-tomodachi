@@ -120,7 +120,7 @@ def download_single_video(final_link,episode_link):
                 default_mode = quality #NOTE if 1-6 like range are given and 1 file has been downloaded it will tip the default_mode to quality of 1 and further videos will be downloaded wih the same quality
     if not os.path.exists(anime_directory):
             pathlib.Path(anime_directory).mkdir(parents=True, exist_ok=True)
-    if not os.path.exists(anime_directory + "\\" + episode_name + ".mp4"):
+    if not (os.path.exists(anime_directory + "\\" + episode_name + ".mp4") or os.path.exists(anime_directory + "\\" + episode_name.split("-")[-1]+ ".mp4")):
         my_playlist = get_child_m3u8(get_playlist_m3u8(final_link))
         matched = False
         length = len(my_playlist)
@@ -201,6 +201,8 @@ def download_chunks(video_chunks,anime_directory, episode_name):
 def append_them_all(length,anime_directory,episode_name, chunks):
     print("\nAppending Pieces together......")
     big_episode = anime_directory + "\\" + episode_name + ".mp4"
+    if len(big_episode) >= 250:
+        big_episode = anime_directory + "\\" + episode_name.split("-")[-1]+ ".mp4"
     big_file = open(big_episode,"wb")
     for i in range (1,length+1):
         chunk_name = chunks+"\\"+"chunk_"+str(i)+".mp4"
