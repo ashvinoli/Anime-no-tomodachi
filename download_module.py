@@ -156,10 +156,10 @@ def download_chunks(video_chunks,anime_directory, episode_name):
                 size = os.path.getsize(chunk_name)
                 average_speed = size/(1024*time_difference)
             except:
-                print("Error on chunk "+str(index))
+                print("Error on chunk "+str(index)+". Please consider redownloading episode "+episode_name)
                 chunk_file.close()
                 #os.remove(chunk_name)
-                sys.exit() #Right now I can't think of any nice option other than terminating a program if any chunks fails to download because of some error
+                return #Right now I can't think of any nice option other than terminating a program if any chunks fails to download because of some error
         percentage = int((index/length) * 100)
         #print(percentage,end="")
         #print("% complete.")
@@ -186,7 +186,7 @@ def download_command_line():
     global no_interruption_mode
     while True:
         os.system("cls")
-        interruption = input("Do you want to turn no interruption mode on? If turned on, in this mode all videos in the range you provide will be downloaded with default settings and no queries from the user will be made during the download process. Type y/n:")
+        interruption = input("Do you want to turn no interruption mode on? Type y/n:")
         if interruption == "y":
             no_interruption_mode = True
         print("NOTE: IF YOU WANT TO SKIP ANY TYPING OR QUESTION JUST PRESS \"ENTER\" KEY.\nBUT DONOT PRESS ENTER FOR THIS FIRST QUESTION!\n")
