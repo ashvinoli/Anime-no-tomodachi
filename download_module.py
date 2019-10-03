@@ -184,6 +184,9 @@ def download_command_line():
     global no_interruption_mode
     while True:
         os.system("cls")
+        interruption = input("Do you want to turn no interruption mode on? If turned on, in this mode all videos in the range you provide will be downloaded with default settings and no queries from the user will be made during the download process. Type y/n:")
+        if interruption == "y":
+            no_interruption_mode = True
         print("NOTE: IF YOU WANT TO SKIP ANY TYPING OR QUESTION JUST PRESS \"ENTER\" KEY.\nBUT DONOT PRESS ENTER FOR THIS FIRST QUESTION!\n")
         anime_name = input("Please enter the anime name (example:one-piece). Mind the dash(-) sign:")
         match_dict=[]
@@ -207,11 +210,9 @@ def download_command_line():
                             break
                     else:
                         num = str(num_of_episodes(match_dict[selection]))
-                        interruption = input("Do you want to turn no interruption mode on? If turned on, in this mode all videos in the range you provide will be downloaded with default settings and no queries from the user will be made during the download process. Type y/n:")
                         while True:
                             choice = input("There are "  + num + " episodes for "+ match_dict[selection] +"Type single number eg: 1 or 2 to download single episode, '1-5' to download range, 'A' or 'a' to download all episodes:")
-                            if interruption == "y":
-                                no_interruption_mode = True
+                            
                         
                             if choice.isnumeric():
                                 choice = int(choice)
@@ -232,7 +233,10 @@ def download_command_line():
                                         #print(final_link)
                                         my_m3u8 = get_playlist_m3u8(final_link)
                                         if re.match("https://hls\d\dx",my_m3u8):
-                                            download_in_a_different_way(my_episode[0])
+                                            try:
+                                                download_in_a_different_way(my_episode[0])
+                                            except:
+                                                print(my_episode[0] + " couldn't be download due to some errors. Please considering redownloading it.")
                                         else:
                                             download_single_video(final_link,my_episode[0])
                                         #webbrowser.open_new(final_link)
@@ -249,8 +253,15 @@ def download_command_line():
                                     my_link = write_to_file(my_episode[0])
                                     final_link = my_link.split("//")[-1]
                                     final_link = "https://"+final_link
+                                    my_m3u8 = get_playlist_m3u8(final_link)
                                     #print(final_link)
-                                    download_single_video(final_link,my_episode[0])     
+                                    if re.match("https://hls\d\dx",my_m3u8):
+                                        try:
+                                            download_in_a_different_way(my_episode[0])
+                                        except:
+                                            print(my_episode[0] + " couldn't be download due to some errors. Please considering redownloading it.")
+                                    else:
+                                        download_single_video(final_link,my_episode[0])
                             elif choice == "A" or choice == "a":
                                 episodes_num = num_of_episodes(match_dict[selection].rstrip())
                                 for i in range(1,episodes_num):
@@ -259,7 +270,14 @@ def download_command_line():
                                     final_link = my_link.split("//")[-1]
                                     final_link = "https://"+final_link
                                     #print(final_link)
-                                    download_single_video(final_link,my_episode[0])  
+                                    my_m3u8 = get_playlist_m3u8(final_link)
+                                    if re.match("https://hls\d\dx",my_m3u8):
+                                        try:
+                                            download_in_a_different_way(my_episode[0])
+                                        except:
+                                            print(my_episode[0] + " couldn't be download due to some errors. Please considering redownloading it.")
+                                    else:
+                                        download_single_video(final_link,my_episode[0])
                             else:
                                 resp=input("Invalid option input. Reinput? Type y/n:")
                                 if resp != "y":
