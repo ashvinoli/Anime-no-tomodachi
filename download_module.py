@@ -68,6 +68,8 @@ def download_in_a_different_way(episode_link):
         time_difference = time_new-time_prev
         time_prev = time_new
         percentage = int(index*standard_size/int(size)*100)
+        if percentage >= 100:
+            percentage = 100
         average_speed = (standard_size)/(1024*time_difference)
         print("\r%d%% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
         index += 1
