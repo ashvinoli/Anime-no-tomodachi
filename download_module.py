@@ -243,7 +243,11 @@ def download_command_line():
                 found = True
         f.close()
         if found:
-            repeat.write(anime_name+"\n")
+            try:
+                repeat.write(anime_name+"\n")
+            except:
+                pass
+            
             for i in range(len(match_dict)):
                 print(str(i+1) + "--->" + match_dict[i])
             while True:
@@ -258,7 +262,10 @@ def download_command_line():
                         if resp != "y":
                             break
                     else:
-                        repeat.write(str(selection+1)+"\n")
+                        try:
+                            repeat.write(str(selection+1)+"\n")
+                        except:
+                            pass
                         num = str(num_of_episodes(match_dict[selection]))
                         while True:
                             if choice_response == None:
@@ -278,8 +285,11 @@ def download_command_line():
                                     if resp != "y":
                                         break
                                 else:
-                                    repeat.write(str(choice)+"\n")
-                                    repeat.close()
+                                    try:
+                                        repeat.write(str(choice)+"\n")
+                                        repeat.close()
+                                    except:
+                                        pass
                                     while True:
                                         if choice > int(num):
                                             print("Sorry, we are now out of episodes!")
@@ -304,8 +314,11 @@ def download_command_line():
                                         else:
                                             choice += 1
                             elif re.match("^\d+-\d+$",choice): #don't miss the ^ and $ to exact match
-                                repeat.write(str(choice)+"\n")
-                                repeat.close()
+                                try:
+                                    repeat.write(str(choice)+"\n")
+                                    repeat.close()
+                                except:
+                                    pass
                                 begin = int(choice.split("-")[0])
                                 end = int(choice.split("-")[1])
                                 for i in range(begin,end+1):
@@ -323,10 +336,13 @@ def download_command_line():
                                     else:
                                         download_single_video(final_link,my_episode[0])
                             elif choice == "A" or choice == "a":
-                                repeat.write(str(choice)+"\n")
-                                repeat.close()
+                                try:
+                                    repeat.write(str(choice)+"\n")
+                                    repeat.close()
+                                except:
+                                    pass
                                 episodes_num = num_of_episodes(match_dict[selection].rstrip())
-                                for i in range(1,episodes_num):
+                                for i in range(1,episodes_num+1):
                                     my_episode = get_single_episode(match_dict[selection].rstrip(),i)
                                     my_link = write_to_file(my_episode[0])
                                     final_link = my_link.split("//")[-1]
