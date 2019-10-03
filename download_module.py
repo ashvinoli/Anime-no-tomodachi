@@ -6,19 +6,24 @@ import math
 
 
 
-repeat_mode = False
 no_interruption_mode = False
-
 interruption_response = None
 anime_name_response = None
 selection_response = None
+choice_response = None
 
-if len(sys.argv) == 1:
+if len(sys.argv) == 2:  #First argument is file name
+    lines = []
     if os.path.exists("repeat.txt"):
-        if sys.argv[0] == "-r":
-            repeat_mode = True
+        if sys.argv[1] == "-r":
             repeat = open("repeat.txt","r")
-            
+            for line in repeat:
+                lines.append(line.rstrip())
+            if len(lines)>=4:
+                interruption_response = lines[0]
+                anime_name_response = lines[1]
+                selection_response = lines[2]
+                choice_response = lines[3]
             repeat.close()
         
 def video_quality_selection(my_playlist,anime_directory,episode_name):
@@ -210,13 +215,25 @@ def append_them_all(length,anime_directory,episode_name, chunks):
 
 def download_command_line():
     global no_interruption_mode
+    global interruption_response 
+    global anime_name_response 
+    global selection_response 
+    global choice_response
+    repeat = open("repeat.txt","w")
+    if interruption_response == None:
+        interruption = input("Do you want to turn no interruption mode on? Type y/n:")
+    else:
+        interruption = interruption_response
+    repeat.write(interruption+"\n")
+    if interruption == "y":
+        no_interruption_mode = True
     while True:
         os.system("cls")
-        interruption = input("Do you want to turn no interruption mode on? Type y/n:")
-        if interruption == "y":
-            no_interruption_mode = True
         print("NOTE: IF YOU WANT TO SKIP ANY TYPING OR QUESTION JUST PRESS \"ENTER\" KEY.\nBUT DONOT PRESS ENTER FOR THIS FIRST QUESTION!\n")
-        anime_name = input("Please enter the anime name (example:one-piece). Mind the dash(-) sign:")
+        if anime_name_response == None:
+            anime_name = input("Please enter the anime name (example:one-piece). Mind the dash(-) sign:")
+        else:
+            anime_name = anime_name_response    
         match_dict=[]
         f=open("all_animes.txt","r")
         found = False
@@ -226,10 +243,14 @@ def download_command_line():
                 found = True
         f.close()
         if found:
+            repeat.write(anime_name+"\n")
             for i in range(len(match_dict)):
                 print(str(i+1) + "--->" + match_dict[i])
             while True:
-                selection = input("Please select your option among the SEARCHED RESULTS:")
+                if selection_response == None:
+                    selection = input("Please select your option among the SEARCHED RESULTS:")
+                else:
+                    selection = selection_response    
                 if selection.isnumeric():
                     selection = int(selection)-1
                     if selection > len(match_dict)-1 or selection < 0:
@@ -237,11 +258,18 @@ def download_command_line():
                         if resp != "y":
                             break
                     else:
+                        repeat.write(str(selection+1)+"\n")
                         num = str(num_of_episodes(match_dict[selection]))
                         while True:
-                            choice = input("There are "  + num + " episodes for "+ match_dict[selection] +"Type single number eg: 1 or 2 to download single episode, '1-5' to download range, 'A' or 'a' to download all episodes:")
-                            
-                        
+                            if choice_response == None:
+                                choice = input("There are "  + num + " episodes for "+ match_dict[selection] +"Type single number eg: 1 or 2 to download single episode, '1-5' to download range, 'A' or 'a' to download all episodes:")
+                            else:
+                                choice = choice_response
+                                interruption_response = None
+                                anime_name_response = None
+                                selection_response = None
+                                choice_response = None
+                                
                             if choice.isnumeric():
                                 choice = int(choice)
                                 if choice > int(num) or choice < 1:
@@ -250,6 +278,8 @@ def download_command_line():
                                     if resp != "y":
                                         break
                                 else:
+                                    repeat.write(str(choice)+"\n")
+                                    repeat.close()
                                     while True:
                                         if choice > int(num):
                                             print("Sorry, we are now out of episodes!")
@@ -274,6 +304,8 @@ def download_command_line():
                                         else:
                                             choice += 1
                             elif re.match("^\d+-\d+$",choice): #don't miss the ^ and $ to exact match
+                                repeat.write(str(choice)+"\n")
+                                repeat.close()
                                 begin = int(choice.split("-")[0])
                                 end = int(choice.split("-")[1])
                                 for i in range(begin,end+1):
@@ -291,6 +323,8 @@ def download_command_line():
                                     else:
                                         download_single_video(final_link,my_episode[0])
                             elif choice == "A" or choice == "a":
+                                repeat.write(str(choice)+"\n")
+                                repeat.close()
                                 episodes_num = num_of_episodes(match_dict[selection].rstrip())
                                 for i in range(1,episodes_num):
                                     my_episode = get_single_episode(match_dict[selection].rstrip(),i)
