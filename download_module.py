@@ -34,7 +34,50 @@ def video_quality_selection(my_playlist,anime_directory,episode_name):
             if resp != "y":
                 break
 
-    
+            
+def download_in_a_different_way(episode_link):
+    series_name = "-".join(episode_link.split("/")[-1].split("-")[:-2])
+    episode_name = episode_link.split("/")[-1]
+    program_path = os.path.dirname(os.path.realpath(__file__))
+    anime_directory = program_path + "\\" + series_name + "\\" + episode_name
+    chunks = anime_directory + "\\Chunks"
+    if os.path.exists(anime_directory + "\\" +episode_name+".mp4"):
+        print(episode_name+" has already been downloaded")
+        return
+    if not os.path.exists(chunks):
+        pathlib.Path(chunks).mkdir(parents=True, exist_ok=True)
+    vid_stream_link = BeautifulSoup(requests.get(episode_link).text,"html.parser").findAll("a",{"href":re.compile(r"https://vidstreaming.io/download.*")})[0].get("href")
+    #print(vid_stream_link)
+    download_link = BeautifulSoup(requests.get(vid_stream_link).text,"html.parser").findAll("a",{"href":re.compile(r"https://st\dx.cdnfile.info.*")})[0].get("href")
+    #print(download_link)
+    size = requests.head(download_link).headers.get("Content-length")
+    #print(size)
+    files = requests.get(download_link,stream=True)
+    files.raise_for_status
+    index = 1
+    print("Downloading "+episode_link)
+    time_prev = time.time()
+    standard_size = 1048576
+    file_pieces = files.iter_content(chunk_size = standard_size)
+    for piece in files.iter_content(chunk_size = standard_size):
+        chunk_name = chunks+"\\"+"chunk_"+str(index)+".mp4"
+        chunk_file = open(chunk_name,"wb")
+        chunk_file.write(piece)
+        chunk_file.close()
+        time_new = time.time()
+        time_difference = time_new-time_prev
+        time_prev = time_new
+        percentage = int(index*standard_size/int(size)*100)
+        average_speed = (standard_size)/(1024*time_difference)
+        print("\r%d%% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
+        index += 1
+
+    append_them_all(index-1,anime_directory,episode_name,chunks)
+        
+        
+        
+        
+   
 def download_single_video(final_link,episode_link):
     global default_mode
     global no_interruption_mode
@@ -118,7 +161,7 @@ def download_chunks(video_chunks,anime_directory, episode_name):
         percentage = int((index/length) * 100)
         #print(percentage,end="")
         #print("% complete.")
-        print("\r%d %% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
+        print("\r%d%% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
         index += 1
     append_them_all(length,anime_directory, episode_name,chunks)
 
@@ -187,7 +230,11 @@ def download_command_line():
                                         final_link = my_link.split("//")[-1]
                                         final_link = "https://"+final_link
                                         #print(final_link)
-                                        download_single_video(final_link,my_episode[0])
+                                        my_m3u8 = get_playlist_m3u8(final_link)
+                                        if re.match("https://hls\d\dx",my_m3u8):
+                                            download_in_a_different_way(my_episode[0])
+                                        else:
+                                            download_single_video(final_link,my_episode[0])
                                         #webbrowser.open_new(final_link)
                                         resp = input("Want to download next episode? Type y/n:")
                                         if resp != 'y':

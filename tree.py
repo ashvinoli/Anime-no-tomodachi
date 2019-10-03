@@ -111,6 +111,7 @@ def get_child_m3u8(playlist_m3u8):
      head_url = playlist_m3u8.split("/")[2]
      head_url = "https://" + head_url
      global headers
+     m3u8 = []
      if head_url == "https://hls10x.cdnfile.info":
           headers_new = {  "Origin":"https://vidstreaming.io",\
                        "Referrer":"https://vidstreaming.io/",\
@@ -118,17 +119,22 @@ def get_child_m3u8(playlist_m3u8):
                        "Sec-Fetch-Mode":"cors",\
                        "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
           temp_m3 = requests.get(playlist_m3u8,headers = headers_new)
+     elif head_url=="https://hls11x.cdnfile.info":
+          temp_m3 = requests.get(playlist_m3u8)
+          #Parse the m3u8
+          my_chunk = "/".join(playlist_m3u8.split("/")[:-1])
+          lines = temp_m3.text.split("\n")
      else:
           temp_m3 = requests.get(playlist_m3u8,headers = headers)
-     m3u8 = []
-     #print(temp_m3.text)
-     lines = temp_m3.text.split("\n")
-     for i in range(len(lines)):
-          resolution = []
-          if re.search("\d+x\d+",lines[i]):
-               resolution.append(re.search("\d+x\d+",lines[i]).group(0))
-               resolution.append(head_url+lines[i+1])
-               m3u8.append(resolution)      
+          #print(temp_m3.text)
+          #Parse the m3u8 and take bundle the qualities available with the download link
+          lines = temp_m3.text.split("\n")
+          for i in range(len(lines)):
+               resolution = []
+               if re.search("\d+x\d+",lines[i]):
+                    resolution.append(re.search("\d+x\d+",lines[i]).group(0))
+                    resolution.append(head_url+lines[i+1])
+                    m3u8.append(resolution)      
      return m3u8
 
 def provide_video_chunks(video_m3u8):
@@ -140,6 +146,7 @@ def provide_video_chunks(video_m3u8):
      temp_m3 = requests.get(video_m3u8,headers=headers)
      all_lines = temp_m3.text.split("\n")
      bits_extracted_prev = ""
+     #Parse the video_m3u8 file, to extract chunks and prevent repetition
      for line in all_lines:
         if re.match("^/",line):
              bits_extracted_new = line.split(".")[-2].split("-")[-1]
