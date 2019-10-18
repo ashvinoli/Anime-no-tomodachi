@@ -28,3 +28,7 @@ Imagine you sleep after putting a range say 2-200 for episodes to download. The 
 PermissionError: [Errno 13] Permission denied: 'temp_vid.mp4'
 ```
 This error occurs because VLC media player started slower in your system. Restart the program and it will disappear as VLC will only start slowly at the first instance. I will fix it as soon as possible 
+
+## Adding new anime to the list
+Although there is a function in the program to update the anime list, but I haven't made it accessible from the program. I just felt I would be watching one-piece and nothing else. But adding the anime not in the list is easy:
+"https://www9.gogoanime.io//category/boku-no-hero-academia-4th-season" is not in the list. If you search boku-no-hero this option won't show up, because it was added after I made the list file. So simply copy and paste it at the end of "all_animes.txt" file and you are good to go. That was a simple example. If you do no find anime in the search, try japanese name, and if it fails even then then search it in gogoanime, get the link as above (You do not need "//", "/" works fine), and paste it at the end of file. Simple!
