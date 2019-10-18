@@ -160,26 +160,26 @@ def download_chunk(url):
      return requests.get(url,headers=headers).content
 
 def quality_selection(my_playlist):
-    #This function prompts the user to select quality
-    global default_mode
-    index = 1
-    length = len(my_playlist)
-    for _ in my_playlist:
-        print(str(index) + "----->"+ _[0])
-        index += 1
-    while True:
-        resp = input("Choose the quality of video:")
-        if resp.isnumeric() and int(resp) <= length and int(resp) >= 1:
-            my_quality_video = provide_video_chunks(my_playlist[int(resp)-1][1])
-            ans = input("Do you want to keep it as default quality for the next videos? Type y/n:")
-            if ans == "y":
-                default_mode = my_playlist[int(resp)-1][0]
-                stream_video(my_quality_video)
-                break
-        else:
-            resp = input("Bad quality!!!!!! Re-enter quality y/n?")
-            if resp != "y":
-                break
+     #This function prompts the user to select quality
+     global default_mode
+     index = 1
+     length = len(my_playlist)
+     for _ in my_playlist:
+          print(str(index) + "----->"+ _[0])
+          index += 1
+     while True:
+          resp = input("Choose the quality of video:")
+          if resp.isnumeric() and int(resp) <= length and int(resp) >= 1:
+               my_quality_video = provide_video_chunks(my_playlist[int(resp)-1][1])
+               ans = input("Do you want to keep it as default quality for the next videos? Type y/n:")
+               if ans == "y":
+                    default_mode = my_playlist[int(resp)-1][0]
+               stream_video(my_quality_video)
+               break
+          else:
+               resp = input("Bad quality!!!!!! Re-enter quality y/n?")
+               if resp != "y":
+                    break
     
 def watch_video(end_url):
     global default_mode

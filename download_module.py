@@ -46,8 +46,8 @@ def video_quality_selection(my_playlist,anime_directory,episode_name):
             quality_file.close()
             if ans == "y":
                 default_mode = my_playlist[int(resp)-1][0]
-                download_chunks(my_quality_video,anime_directory,episode_name)
-                break
+            download_chunks(my_quality_video,anime_directory,episode_name)
+            break
             
         else:
             resp = input("Bad quality!!!!!! Re-enter quality y/n?")

@@ -19,6 +19,7 @@ To repeat the first 4 commands of last session you ran, for example: you might h
 ```
 python download_module.py -r
 ```
+If you want you can edit the repeat.txt to simplify things. Do not enter invalid input in the text file, else the program will go into infinite loop. For example, if you open the "repeat.txt" file and manually enter "asdfasddafa" in the second row which would take the name of anime, the program will run infinitely displaying the error message. This is because, there is automatic redirection of input taken of file to the variable, so mind it before you make edits to the "repeat.txt" file and running the program with "-r" handle.
 ## No-Interruption-Mode
 Imagine you sleep after putting a range say 2-200 for episodes to download. The program will ask for quality for episode 2, and if you set the quality to default, no further queries about the quality will be made. What if episode 150 didn't have the default quality you selected? If no-interruption-mode is not turned on, the program expects user input, asking for another quality the the video 150 has. Do you want that after you have slept? Wake up expecting all 200 downloaded episodes, but alas the program is stuck at 150. To remedy this I have added the No-interruption-mode, in this mode, even if the episode doesn't contain the default quality, it will download the quality it has. With this ammendment, you can now have a sound sleep after providing the program with a range of 2-200.
 
