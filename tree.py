@@ -153,6 +153,22 @@ def provide_video_chunks(video_m3u8):
              if bits_extracted_new != bits_extracted_prev:
                   chunks.append(head_url+line)
                   bits_extracted_prev = bits_extracted_new
+     
+     return chunks
+
+def provide_video_chunks_new(video_m3u8):
+     #returns the video chunks for the quality selected
+     global headers
+     chunks = []
+     head_url = video_m3u8.split("/")[2]
+     head_url = "https://" + head_url
+     temp_m3 = requests.get(video_m3u8,headers=headers)
+     all_lines = temp_m3.text.split("\n")
+     bits_extracted_prev = ""
+     #Parse the video_m3u8 file, to extract chunks and prevent repetition
+     for line in all_lines:
+        if re.match("^https",line):
+             chunks.append(line)
      return chunks
                   
 def download_chunk(url):
@@ -171,6 +187,8 @@ def quality_selection(my_playlist):
           resp = input("Choose the quality of video:")
           if resp.isnumeric() and int(resp) <= length and int(resp) >= 1:
                my_quality_video = provide_video_chunks(my_playlist[int(resp)-1][1])
+               if len(my_quality_video) == 0:
+                    my_quality_video = provide_video_chunks_new(my_playlist[int(resp)-1][1])
                ans = input("Do you want to keep it as default quality for the next videos? Type y/n:")
                if ans == "y":
                     default_mode = my_playlist[int(resp)-1][0]
@@ -193,6 +211,8 @@ def watch_video(end_url):
             for _ in my_playlist:
                 if _[0] == default_mode:
                     my_quality_video = provide_video_chunks(_[1])
+                    if len(my_quality_video) == 0:
+                         my_quality_video = provide_video_chunks_new(_[1])
                     stream_video(my_quality_video)
                     matched = True
                     break

@@ -40,6 +40,8 @@ def video_quality_selection(my_playlist,anime_directory,episode_name):
         resp = input("Choose the quality of video:")
         if resp.isnumeric() and int(resp) <= length and int(resp) >= 1:
             my_quality_video = provide_video_chunks(my_playlist[int(resp)-1][1])
+            if len(my_quality_video) == 0:
+                my_quality_video = provide_video_chunks_new(my_playlist[int(resp)-1][1])
             ans = input("Do you want to keep it as default quality for the next videos? Type y/n:")
             quality_file = open(chunks +"\\quality.txt","w")
             quality_file.write(my_playlist[int(resp)-1][0])
@@ -134,6 +136,8 @@ def download_single_video(final_link,episode_link):
                         quality_file.write(default_mode)
                         quality_file.close()
                         my_quality_video = provide_video_chunks(_[1])
+                        if len(my_quality_video) ==0:
+                            my_quality_video = provide_video_chunks_new(_[1])
                         download_chunks(my_quality_video,anime_directory,episode_name)
                         matched = True
                         break
@@ -170,7 +174,7 @@ def download_chunks(video_chunks,anime_directory, episode_name):
                 chunk_file = open(chunk_name,"wb")
                 try:
                     begin_time = time.time()
-                    current_chunk = requests.get(chunk,headers = headers).content
+                    current_chunk = requests.get(chunk).content #the headers for file request have been removed
                     end_time = time.time()
                     time_difference = end_time-begin_time
                     chunk_file.write(current_chunk)
