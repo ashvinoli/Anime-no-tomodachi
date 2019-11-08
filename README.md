@@ -1,8 +1,8 @@
 # Table of Contents
 - [Anime-no-tomodachi](#anime-no-tomodachi)
+  * [Usage](#usage)
   * [Video Issue](#video-issue)
   * [Special Note](#special-note)
-  * [Usage](#usage)
   * [Repeat first 4 commands](#repeat-first-4-commands)
   * [No-Interruption-Mode](#no-interruption-mode)
   * [Adding new anime to the list](#adding-new-anime-to-the-list)
@@ -10,11 +10,6 @@
 ## Anime-no-tomodachi
 Your Anime Friend. It scrapes links from "gogoanime" site and provides an easy way to view animes in vlc media player. Downloading option is also available. Everything is command line.
 
-## Video Issue
-For downloaded videos please use media player other than VLC. For some reason VLC can't play the downloaded video
-
-## Special Note
-During VLC play, the play might end after a few seconds, that is because the download is slow. Press the play button in VLC again to view the updated video. You might experience same problem while trying to forward or skip part of video. Again you will reach the end of downloaded file chunk, so wait and again click the play button. And sometimes, certain errors might occur which will go away just by re-starting the program.
 ## Usage
 Please used python 3.7 or higher if available. Install required libraries.
 * To watch video:
@@ -27,6 +22,12 @@ Just type the following
 ```
 python download_module.py
 ```
+## Video Issue
+For downloaded videos please use media player other than VLC. For some reason VLC can't play the downloaded video
+
+## Special Note
+During VLC play, the play might end after a few seconds, that is because the download is slow. Press the play button in VLC again to view the updated video. You might experience same problem while trying to forward or skip part of video. Again you will reach the end of downloaded file chunk, so wait and again click the play button. And sometimes, certain errors might occur which will go away just by re-starting the program.
+
 ## Repeat first 4 commands
 To repeat the first 4 commands of last session you ran, for example: you might have said "y" to interruption question, "monster" to anime name, "5" to selection number and "1-5" to episode range, if you simply want to repeat the same sequence, you needn't retype everything simply:
 ```
