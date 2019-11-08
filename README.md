@@ -1,4 +1,13 @@
-# Anime-no-tomodachi
+# Table of Contents
+- [Anime-no-tomodachi](#anime-no-tomodachi)
+  * [Video Issue](#video-issue)
+  * [Special Note](#special-note)
+  * [Usage](#usage)
+  * [Repeat first 4 commands](#repeat-first-4-commands)
+  * [No-Interruption-Mode](#no-interruption-mode)
+  * [Adding new anime to the list](#adding-new-anime-to-the-list)
+
+## Anime-no-tomodachi
 Your Anime Friend. It scrapes links from "gogoanime" site and provides an easy way to view animes in vlc media player. Downloading option is also available. Everything is command line.
 
 ## Video Issue
