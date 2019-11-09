@@ -11,7 +11,7 @@
 Your Anime Friend. It scrapes links from "gogoanime" site and provides an easy way to view animes in vlc media player. Downloading option is also available. Everything is command line.
 
 ## Usage
-Please used python 3.7 or higher if available. Install required libraries.
+Please use python 3.7 or higher if available. Install required libraries.
 * To watch video:
 Add vlc to PATH and-
 ```
