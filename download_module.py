@@ -124,6 +124,7 @@ def download_single_video(final_link,episode_link):
             pathlib.Path(anime_directory).mkdir(parents=True, exist_ok=True)
     if not (os.path.exists(anime_directory + "\\" + episode_name + ".mp4") or os.path.exists(anime_directory + "\\" + episode_name.split("-")[-1]+ ".mp4")):
         my_playlist = get_child_m3u8(get_playlist_m3u8(final_link))
+        #print(my_playlist)
         matched = False
         length = len(my_playlist)
         if length != 0:
@@ -154,6 +155,7 @@ def download_single_video(final_link,episode_link):
         print(episode_name+" has already been downloaded!")
     
 def download_chunks(video_chunks,anime_directory, episode_name):
+    #print(video_chunks)
     chunks = anime_directory + "\\Chunks"
     index = 1
     average_speed = math.inf
@@ -174,7 +176,8 @@ def download_chunks(video_chunks,anime_directory, episode_name):
                 chunk_file = open(chunk_name,"wb")
                 try:
                     begin_time = time.time()
-                    current_chunk = requests.get(chunk).content #the headers for file request have been removed
+                    current_chunk = requests.get(chunk,headers=headers).content
+                    #print(current_chunk)#the headers for file request have been removed
                     end_time = time.time()
                     time_difference = end_time-begin_time
                     chunk_file.write(current_chunk)
@@ -306,6 +309,7 @@ def download_command_line():
                                         final_link = "https://"+final_link
                                         #print(final_link)
                                         my_m3u8 = get_playlist_m3u8(final_link)
+                                        #print(my_m3u8)
                                         if re.match("https://hls\d\dx",my_m3u8):
                                             try:
                                                 download_in_a_different_way(my_episode[0])

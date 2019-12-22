@@ -140,10 +140,12 @@ def get_child_m3u8(playlist_m3u8):
 def provide_video_chunks(video_m3u8):
      #returns the video chunks for the quality selected
      global headers
+     #print(video_m3u8)
      chunks = []
      head_url = video_m3u8.split("/")[2]
      head_url = "https://" + head_url
      temp_m3 = requests.get(video_m3u8,headers=headers)
+     #print(temp_m3.text)
      all_lines = temp_m3.text.split("\n")
      bits_extracted_prev = ""
      #Parse the video_m3u8 file, to extract chunks and prevent repetition
@@ -294,7 +296,7 @@ def command_line_watch():
                                                my_link = write_to_file(my_episode[0])
                                                final_link = my_link.split("//")[-1]
                                                final_link = "https://"+final_link
-                                               print(final_link)
+                                               #print(final_link)
                                                watch_video(final_link)
                                                #print(final_link)
                                                #webbrowser.open_new(final_link)
