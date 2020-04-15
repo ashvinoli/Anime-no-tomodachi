@@ -6,15 +6,35 @@ import os
 import subprocess
 import time
 
-global_url = "https://www9.gogoanime.io/"
+global_url = "https://www10.gogoanime.io/"
+global_head_url = "https://www10.gogoanime.io/category/"
 headers = {"Referrer Policy":"unsafe-url",\
                   "Origin":"https://vidstreaming.io",\
                   "Referer":"https://vidstreaming.io/",\
                   "Sec-Fetch-Mode":"cors",\
                   "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"}
+messenger = ""
 
 default_mode = None
+log_file = open("error_log.txt","w")
+log_file.close()
 
+def open_log_file():
+     global log_file
+     log_file = open("error_log.txt","a")
+     
+def close_log_file():
+     global log_file
+     log_file.close()
+
+def write_to_log_file(header,content):
+     global log_file
+     open_log_file()
+     log_file.write(header)
+     log_file.write(content)
+     log_file.write("\n\n\n\n")
+     close_log_file()
+     
 def write_to_file(link):
      my_link_opened =BeautifulSoup(requests.get(link).text,"html.parser")
      iframes = my_link_opened.findAll("iframe")
@@ -29,7 +49,23 @@ def write_to_file(link):
         file.write(final_link + "\n")
         file.close()
         return final_link
-                                
+
+def play_video_in_vlc(video_link):
+     global messenger
+     subprocess.run(["vlc",video_link])
+
+     
+def check_for_ways_to_play(video_link):
+     if "redirector" in video_link:
+          play_video_in_vlc(video_link)
+     
+     
+def make_video_url_ready(highlighted_episode):
+     global global_url
+     url = global_url + "".join(highlighted_episode.split("\n"))
+     php_url = "http://" + write_to_file(url).split("//")[-1]
+     return  php_url
+     
 def get_anime_list(url):
     global global_url
     all_anime = []
@@ -52,9 +88,10 @@ def get_ALL_anime_list():
 
 def get_all_episodes(url):
     global global_url
+    episode_url_list = []
     largest = num_of_episodes(url)
     for i in range(1,largest+1):
-        episode_url_list.append(get_single_episode(url,i)[0])
+        episode_url_list.append(global_url+url.split("/")[-1]+"-episode-"+str(i))
     return episode_url_list
 
 def num_of_episodes(url):
@@ -104,6 +141,7 @@ def get_playlist_m3u8(end_url):
           m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
      except:
           m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
+     write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
      return m3u8
 
 def get_child_m3u8(playlist_m3u8):
@@ -134,7 +172,10 @@ def get_child_m3u8(playlist_m3u8):
                if re.search("\d+x\d+",lines[i]):
                     resolution.append(re.search("\d+x\d+",lines[i]).group(0))
                     resolution.append(head_url+lines[i+1])
-                    m3u8.append(resolution)      
+                    m3u8.append(resolution)
+     for _ in m3u8:
+          write_to_log_file("Child_m3u8:\n",'\n'.join(_))
+          
      return m3u8
 
 def provide_video_chunks(video_m3u8):
@@ -250,8 +291,16 @@ def stream_video(video_chunks):
                          if not vlc_opened:
                               my_program = subprocess.Popen(["vlc","temp_vid.mp4"])
                               vlc_opened = True
+def format_search_query(search_query):
+     formatted_anime_name  = "-".join(search_query.split(" "))
+     return formatted_anime_name
 
-               
+def search_for_anime(formatted_anime_name):
+     anime_list_file = open("all_animes.txt","r")
+     matched_items = [line for line in anime_list_file if formatted_anime_name in line]
+     return matched_items
+
+                              
 def command_line_watch():
      while True:
          os.system("cls")

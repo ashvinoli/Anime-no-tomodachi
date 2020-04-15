@@ -5,7 +5,6 @@ import time
 import math
 
 
-
 no_interruption_mode = False
 interruption_response = None
 anime_name_response = None
@@ -29,7 +28,7 @@ if len(sys.argv) == 2:  #First argument is file name
 def video_quality_selection(my_playlist,anime_directory,episode_name):
     #This function prompts the user to select quality
     global default_mode
-    chunks = anime_directory + "\\Chunks"
+    chunks = anime_directory + "/Chunks"
     index = 1
     length = len(my_playlist)
     print("Video qualities available for "+ episode_name)
@@ -43,7 +42,7 @@ def video_quality_selection(my_playlist,anime_directory,episode_name):
             if len(my_quality_video) == 0:
                 my_quality_video = provide_video_chunks_new(my_playlist[int(resp)-1][1])
             ans = input("Do you want to keep it as default quality for the next videos? Type y/n:")
-            quality_file = open(chunks +"\\quality.txt","w")
+            quality_file = open(chunks +"/quality.txt","w")
             quality_file.write(my_playlist[int(resp)-1][0])
             quality_file.close()
             if ans == "y":
@@ -58,23 +57,27 @@ def video_quality_selection(my_playlist,anime_directory,episode_name):
 
             
 def download_in_a_different_way(episode_link):
+    global headers
     series_name = "-".join(episode_link.split("/")[-1].split("-")[:-2])
     episode_name = episode_link.split("/")[-1]
     program_path = os.path.dirname(os.path.realpath(__file__))
-    anime_directory = program_path + "\\" + series_name + "\\" + episode_name
-    chunks = anime_directory + "\\Chunks"
-    if os.path.exists(anime_directory + "\\" +episode_name+".mp4"):
+    anime_directory = program_path + "/" + series_name + "/" + episode_name
+    chunks = anime_directory + "/Chunks"
+    if os.path.exists(anime_directory + "/" +episode_name+".mp4"):
         print(episode_name+" has already been downloaded")
         return
     if not os.path.exists(chunks):
         pathlib.Path(chunks).mkdir(parents=True, exist_ok=True)
     vid_stream_link = BeautifulSoup(requests.get(episode_link).text,"html.parser").findAll("a",{"href":re.compile(r"https://vidstreaming.io/download.*")})[0].get("href")
     #print(vid_stream_link)
+    write_to_log_file("Video stream link from download in different way:\n",vid_stream_link)
     download_link = BeautifulSoup(requests.get(vid_stream_link).text,"html.parser").findAll("a",{"href":re.compile(r"https://st\dx.cdnfile.info.*")})[0].get("href")
     #print(download_link)
-    size = requests.head(download_link).headers.get("Content-length")
+    write_to_log_file("Download link for episode " +episode_link +":\n",download_link)
+    #size = requests.head(download_link).headers.get("Content-length") The headers couldn't be retrieved so I had to comment this out
     #print(size)
-    files = requests.get(download_link,stream=True)
+    #write_to_log_file("Size of episode:\n",size)
+    files = requests.get(download_link,headers = headers,stream=True)
     files.raise_for_status
     index = 1
     print("Downloading "+episode_link)
@@ -82,18 +85,18 @@ def download_in_a_different_way(episode_link):
     standard_size = 1048576
     file_pieces = files.iter_content(chunk_size = standard_size)
     for piece in files.iter_content(chunk_size = standard_size):
-        chunk_name = chunks+"\\"+"chunk_"+str(index)+".mp4"
+        chunk_name = chunks+"/"+"chunk_"+str(index)+".mp4"
         chunk_file = open(chunk_name,"wb")
         chunk_file.write(piece)
         chunk_file.close()
         time_new = time.time()
         time_difference = time_new-time_prev
         time_prev = time_new
-        percentage = int(index*standard_size/int(size)*100)
-        if percentage >= 100:
-            percentage = 100
+        #percentage = int(index*standard_size/int(size)*100)
+        #if percentage >= 100:
+        #    percentage = 100
         average_speed = (standard_size)/(1024*time_difference)
-        print("\r%d%% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
+        print(str(index)+" chunks downloaded. Average internet speed = %.2f KB/s" % (average_speed),end="")
         index += 1
 
     append_them_all(index-1,anime_directory,episode_name,chunks)
@@ -108,21 +111,21 @@ def download_single_video(final_link,episode_link):
     series_name = "-".join(episode_link.split("/")[-1].split("-")[:-2])
     episode_name = episode_link.split("/")[-1]
     program_path = os.path.dirname(os.path.realpath(__file__))
-    anime_directory = program_path + "\\" + series_name + "\\" + episode_name
-    chunks = anime_directory + "\\Chunks"
+    anime_directory = program_path + "/" + series_name + "/" + episode_name
+    chunks = anime_directory + "/Chunks"
     if not os.path.exists(chunks):
         pathlib.Path(chunks).mkdir(parents=True, exist_ok=True)
         #default_mode = None 
     else:
-        if os.path.exists(chunks +"\\quality.txt"):
-            quality = chunks + "\\quality.txt"
+        if os.path.exists(chunks +"/quality.txt"):
+            quality = chunks + "/quality.txt"
             quality_file = open(quality,"r")
             for _ in quality_file:
                 quality = _.rstrip()
                 default_mode = quality #NOTE if 1-6 like range are given and 1 file has been downloaded it will tip the default_mode to quality of 1 and further videos will be downloaded wih the same quality
     if not os.path.exists(anime_directory):
             pathlib.Path(anime_directory).mkdir(parents=True, exist_ok=True)
-    if not (os.path.exists(anime_directory + "\\" + episode_name + ".mp4") or os.path.exists(anime_directory + "\\" + episode_name.split("-")[-1]+ ".mp4")):
+    if not (os.path.exists(anime_directory + "/" + episode_name + ".mp4") or os.path.exists(anime_directory + "/" + episode_name.split("-")[-1]+ ".mp4")):
         my_playlist = get_child_m3u8(get_playlist_m3u8(final_link))
         #print(my_playlist)
         matched = False
@@ -133,7 +136,7 @@ def download_single_video(final_link,episode_link):
             else:
                 for _ in my_playlist:
                     if _[0] == default_mode:
-                        quality_file = open(chunks +"\\quality.txt","w")
+                        quality_file = open(chunks +"/quality.txt","w")
                         quality_file.write(default_mode)
                         quality_file.close()
                         my_quality_video = provide_video_chunks(_[1])
@@ -156,7 +159,8 @@ def download_single_video(final_link,episode_link):
     
 def download_chunks(video_chunks,anime_directory, episode_name):
     #print(video_chunks)
-    chunks = anime_directory + "\\Chunks"
+    write_to_log_file("Video chunks for "+ episode_name+"\n","\n".join(video_chunks))
+    chunks = anime_directory + "/Chunks"
     index = 1
     average_speed = math.inf
     global headers
@@ -167,10 +171,10 @@ def download_chunks(video_chunks,anime_directory, episode_name):
     file_count = len([name for name in os.listdir(chunks)])
     #Code below had to be written to ensure that no incomeplete files exists. I resorted to it after  requests.head().headers.get() failed. Code below fails to check the last file chunk. File count also counts the quality file
     if file_count >=2 and file_count <= length+1: #length + 1 because of the quality file
-        os.remove(chunks+"\\"+"chunk_"+str(file_count-1)+".mp4")
+        os.remove(chunks+"/"+"chunk_"+str(file_count-1)+".mp4")
     for chunk in video_chunks:
         tries = 1
-        chunk_name = chunks+"\\"+"chunk_"+str(index)+".mp4"
+        chunk_name = chunks+"/"+"chunk_"+str(index)+".mp4"
         while True:
             if not os.path.exists(chunk_name):
                 chunk_file = open(chunk_name,"wb")
@@ -201,18 +205,18 @@ def download_chunks(video_chunks,anime_directory, episode_name):
         percentage = int((index/length) * 100)
         #print(percentage,end="")
         #print("% complete.")
-        print("\r%d%% complete. Average net speed = %.2f KB/s" % (percentage,average_speed),end="")
+        print("\r%d%% complete. Average internet speed = %.2f KB/s" % (percentage,average_speed),end="")
         index += 1
     append_them_all(length,anime_directory, episode_name,chunks)
 
 def append_them_all(length,anime_directory,episode_name, chunks):
     print("\nAppending Pieces together......")
-    big_episode = anime_directory + "\\" + episode_name + ".mp4"
+    big_episode = anime_directory + "/" + episode_name + ".mp4"
     if len(big_episode) >= 250:
-        big_episode = anime_directory + "\\" + episode_name.split("-")[-1]+ ".mp4"
+        big_episode = anime_directory + "/" + episode_name.split("-")[-1]+ ".mp4"
     big_file = open(big_episode,"wb")
     for i in range (1,length+1):
-        chunk_name = chunks+"\\"+"chunk_"+str(i)+".mp4"
+        chunk_name = chunks+"/"+"chunk_"+str(i)+".mp4"
         chunk_file = open(chunk_name,"rb")
         big_file.write(chunk_file.read())
         chunk_file.close()
@@ -308,8 +312,10 @@ def download_command_line():
                                         final_link = my_link.split("//")[-1]
                                         final_link = "https://"+final_link
                                         #print(final_link)
+                                        write_to_log_file("Link to episode:\n",final_link)
                                         my_m3u8 = get_playlist_m3u8(final_link)
                                         #print(my_m3u8)
+                                        write_to_log_file("M3U8 for episode:\n",my_m3u8)
                                         if re.match("https://hls\d\dx",my_m3u8):
                                             try:
                                                 download_in_a_different_way(my_episode[0])
@@ -336,8 +342,10 @@ def download_command_line():
                                     my_link = write_to_file(my_episode[0])
                                     final_link = my_link.split("//")[-1]
                                     final_link = "https://"+final_link
+                                    write_to_log_file("M3U8 for episode:\n",final_link)
                                     my_m3u8 = get_playlist_m3u8(final_link)
                                     #print(final_link)
+                                    write_to_log_file("M3U8 for episode:\n",my_m3u8)
                                     if re.match("https://hls\d\dx",my_m3u8):
                                         try:
                                             download_in_a_different_way(my_episode[0])
@@ -358,7 +366,9 @@ def download_command_line():
                                     final_link = my_link.split("//")[-1]
                                     final_link = "https://"+final_link
                                     #print(final_link)
+                                    write_to_log_file("M3U8 for episode:\n",final_link)
                                     my_m3u8 = get_playlist_m3u8(final_link)
+                                    write_to_log_file("M3U8 for episode:\n",my_m3u8)
                                     if re.match("https://hls\d\dx",my_m3u8):
                                         try:
                                             download_in_a_different_way(my_episode[0])
