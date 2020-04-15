@@ -81,7 +81,7 @@ def get_ALL_anime_list():
     global global_url
     url = global_url+"anime-list.html?page="
     my_dict = []
-    for i in range(1,52):
+    for i in range(1,55):
         temp_dict = get_anime_list(url+str(i))
         my_dict = my_dict + temp_dict
     return my_dict
@@ -128,11 +128,11 @@ def prepare_master_file():
             write_to_file(episode)
 
 def save_anime_list():
-    all_anime = get_ALL_anime_list()
-    for anime in all_anime:
-        temp_file = open("all_animes.txt","a")
-        temp_file.write(anime+ "\n")
-        temp_file.close()
+     all_anime = get_ALL_anime_list()
+     temp_file = open("all_animes.txt","w")
+     for anime in all_anime:
+          temp_file.write(anime+ "\n")
+     temp_file.close()
 
 def get_playlist_m3u8(end_url):
      #returns the main m3u8
@@ -372,8 +372,9 @@ def command_line_watch():
                   break
      
 if __name__ == "__main__":            
-    try:
-        command_line_watch()
-    except:
-        print("Some error occured!!!! I have no idea what type, perhaps you might want to see your internet connection")
+     try:
+          save_anime_list()
+          print("The anime list has been updated successfully!")
+     except:
+          print("Some error occured!!!! I have no idea what type, perhaps you might want to see your internet connection")
     

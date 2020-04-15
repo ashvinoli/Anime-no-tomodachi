@@ -36,7 +36,7 @@ Imagine you sleep after putting a range say 2-200 for episodes to download. The 
 
 
 ## Adding new anime to the list
-* To update entire anime list, delete the all_animes.txt, then
+* To update entire anime list,
 ```
 python tree.py
 ```
