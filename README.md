@@ -36,5 +36,9 @@ Imagine you sleep after putting a range say 2-200 for episodes to download. The 
 
 
 ## Adding new anime to the list
-Although there is a function in the program to update the anime list, but I haven't made it accessible from the program. I just felt I would be watching one-piece and nothing else. But adding the anime not in the list is easy:
+* To update entire anime list, delete the all_animes.txt, then
+```
+python tree.py
+```
+This will take upto 1-2 minutes. Addition of single anime can be done as follows.
 "https://www9.gogoanime.io//category/boku-no-hero-academia-4th-season" is not in the list. If you search boku-no-hero this option won't show up, because it was added after I made the list file. So simply copy and paste it at the end of "all_animes.txt" file and you are good to go. That was a simple example. If you do no find anime in the search, try japanese name, and if it fails even then then search it in gogoanime, get the link as above (You do not need "//", "/" works fine), and paste it at the end of file. Simple!
