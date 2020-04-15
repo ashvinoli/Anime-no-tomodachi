@@ -1,29 +1,26 @@
 # Table of Contents
 - [Anime-no-tomodachi](#anime-no-tomodachi)
   * [Usage](#usage)
-  * [Video Issue](#video-issue)
   * [Special Note](#special-note)
   * [Repeat first 4 commands](#repeat-first-4-commands)
   * [No-Interruption-Mode](#no-interruption-mode)
   * [Adding new anime to the list](#adding-new-anime-to-the-list)
 
 ## Anime-no-tomodachi
-Your Anime Friend. It scrapes links from "gogoanime" site and provides an easy way to view animes in vlc media player. Downloading option is also available. Everything is command line.
+Your Anime Friend. It scrapes links from "gogoanime" site and provides an easy way to view animes in vlc media player. Downloading option is also available. GUI currently only allows watching animes. Again put VLC in path to be able to watch animes in VLC.
 
 ## Usage
 Please use python 3.7 or higher if available. Install required libraries.
 * To watch video:
 Add vlc to PATH and-
 ```
-python tree.py
+python Anime-no-tomodachi.py
 ```
 * To download video:
 Just type the following
 ```
 python download_module.py
 ```
-## Video Issue
-For downloaded videos please use media player other than VLC. For some reason VLC can't play the downloaded video. Even window media player does the job.
 
 ## Special Note
 During VLC play, the play might end after a few seconds, that is because the download is slow. Press the play button in VLC again to view the updated video. You might experience same problem while trying to forward or skip part of video. Again you will reach the end of downloaded file chunk, so wait and again click the play button. And sometimes, certain errors might occur which will go away just by re-starting the program.
