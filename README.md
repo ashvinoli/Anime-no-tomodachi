@@ -14,7 +14,7 @@ Please use python 3.7 or higher if available. Install required libraries.
 * To watch video:
 Add vlc to PATH and-
 ```
-python Anime-no-tomodachi.py
+python Anime-no-tomodachi-main.py
 ```
 * To download video:
 Just type the following
