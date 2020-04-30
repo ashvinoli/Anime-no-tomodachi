@@ -7,7 +7,7 @@
   * [Adding new anime to the list](#adding-new-anime-to-the-list)
 
 ## Anime-no-tomodachi
-Your Anime Friend. It scrapes links from "gogoanime" site and provides an easy way to view animes in vlc media player. Downloading option is also available. GUI currently only allows watching animes. Again put VLC in path to be able to watch animes in VLC.
+Your Anime Friend. It scrapes links from "gogoanime" site and provides an easy way to view animes in vlc media player. Downloading option is also available. GUI features downloading and watching anime. To download an anime you have to install Internet Download Manager and put "idman.exe" in PATH system variable. To watch in VLC you again have to put "vlc.exe" in the system path.
 
 ## Usage
 Please use python 3.7 or higher if available. Install required libraries.
