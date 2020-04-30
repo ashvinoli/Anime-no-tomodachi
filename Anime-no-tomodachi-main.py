@@ -168,7 +168,7 @@ class window_main(windows):
         if ("redirector" in video_url) or ("vidstreaming" in video_url):
             program_path = os.path.dirname(os.path.realpath(__file__))
             idman_param_list = ["idman","/n","/d",video_url,"/p",os.path.join(program_path,"-".join(episode_name.split("-")[:-2])),"/f",episode_name+".mp4"]
-            self.label_download_status["text"] = episode_name+"\n sent to IDM."
+            self.label_download_status["text"] = episode_name+" sent to IDM."
             call_idm = subprocess.Popen(idman_param_list)
         else:
             self.label_download_status["text"]="The selected episode\ncannot be downloaded"
