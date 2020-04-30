@@ -3,6 +3,8 @@ from windows_class import *
 import threading
 import tree
 import webbrowser
+import os
+import subprocess
 
 class window_main(windows):
     def __init__(self,title="My window",geometry="800x800"):
@@ -28,28 +30,35 @@ class window_main(windows):
         self.label_search_for_anime = Label(self.window,text = "Search for Anime:")
         self.label_TO = Label(self.start_end_frame,text = "To")
         self.label_status = Label(self.buttons_bundle_frame,text ="No Work In Progress." ,fg="green")
+        self.label_download_status = Label(self.buttons_bundle_frame,text ="No Download In Progress." ,fg="red")
+        self.label_download_status["wraplength"] = 200
         
     def pack_labels(self):
         self.label_search_for_anime.grid(row = 1,column=1,sticky=E)
         self.label_TO.grid(row=1,column=2)
         self.label_status.pack()
+        self.label_download_status.pack()
         
     def define_buttons(self):
         width = 27
-        self.download_selected_episode_button = Button(self.buttons_bundle_frame,text = "Download Selected Episode",width = width)
+        self.download_selected_episode_button = Button(self.buttons_bundle_frame,text = "Download Selected Episode",width = width,command = self.download_episode_idman_buffer)
+        self.download_selected_episode_button["state"]="disabled"
         self.watch_in_browser_button = Button(self.window,text = "Watch In Browser",width=width,command = self.watch_in_browser_buffer)
         self.watch_in_browser_button["state"] = "disabled"
         self.watch_in_vlc_button = Button(self.window,text = "Watch In VLC",width=width,command = self.watch_in_vlc_buffer)
         self.watch_in_vlc_button["state"] = "disabled"
-        self.download_all_episodes_button = Button(self.buttons_bundle_frame,text = "Download All Episodes",width = width)
-        self.download_range = Button(self.start_end_frame,text = "Download Range")
+        self.download_all_episodes_button = Button(self.buttons_bundle_frame,text = "Download All Episodes",width = width,command =lambda: self.download_range_buffer(True))
+        self.download_all_episodes_button["state"] = "disabled"
+        self.download_range_button = Button(self.start_end_frame,text = "Download Range",command = self.download_range_buffer)
+        self.download_range_button["state"] = "disabled"
+
         
     def pack_buttons(self):
         self.download_selected_episode_button.pack()
         self.download_all_episodes_button.pack()
         self.watch_in_browser_button.grid(row=3,column=3)
         self.watch_in_vlc_button.grid(row=4,column=3)
-        self.download_range.grid(row=1,column=4)
+        self.download_range_button.grid(row=1,column=4)
 
         
     def define_entries(self):
@@ -95,8 +104,35 @@ class window_main(windows):
         self.scroll_bar_for_anime_list.config(command=self.matched_list.yview)
         self.episodes_list.config(yscrollcommand=self.scroll_bar_for_episode_list.set)
         self.scroll_bar_for_episode_list.config(command=self.episodes_list.yview)
+
     #All associated functions
 
+    def download_range_buffer(self,all_of_them = None):
+        #Multiple ranges downloaded in one session will cause the Range thread to be over-written but the task will be completed
+        self.threads["Range"] = threading.Thread(target=self.download_range,args=(all_of_them,))
+        self.threads["Range"].start()
+        if all_of_them is None:
+            self.label_download_status["text"]="Downloading given range of episodes will begin in a moment\n Fetching List..."
+        else:
+            self.label_download_status["text"]="Downloading ALL of episodes will begin in a moment\nFetching List..."
+    
+    def download_range(self,all_of_them):
+        if all_of_them is None:
+            start = int(self.start_episode_number_entry.get())
+            end = int(self.end_episode_number_entry.get())
+            episodes_list = self.get_episodes(start,end)
+        else:
+            episodes_list = self.get_episodes()
+        self.label_download_status["text"]="Download Episodes List Fetched! Will Download Now..."
+        for episode in episodes_list:
+            self.download_using_idm_single_episode(episode)
+    
+    def download_episode_idman_buffer(self):
+        thread_name = self.episodes_list.get(ANCHOR)
+        self.threads[thread_name]=threading.Thread(target=self.download_using_idm_single_episode)
+        self.threads[thread_name].start()
+        self.label_download_status["text"]="Downloading in IDman.."
+        
     
     def watch_in_vlc_buffer(self):
         self.threads["Watch_In_VLC"]=threading.Thread(target=self.watch_in_vlc)
@@ -109,6 +145,7 @@ class window_main(windows):
         self.label_status["text"] = "Opening the selected\nepisode in broswer..."
     
     def fire_episodes_list_box_selected_buffer(self,event):
+        self.download_selected_episode_button["state"]="normal"
         self.threads["Episodes_Box_Clicked"] = threading.Thread(target=self.fire_episodes_list_box_selected,args = (event,))
         self.threads["Episodes_Box_Clicked"].start()
         self.label_status["text"] = "Fetching Video URL..."
@@ -117,10 +154,24 @@ class window_main(windows):
 
         
     def fire_list_box_selected_buffer(self,event):
+        self.download_range_button["state"]="normal"
+        self.download_all_episodes_button["state"] = "normal"
         self.threads["List_Box_Clicked"] = threading.Thread(target = self.fire_list_box_selected,args=(event,))
         self.threads["List_Box_Clicked"].start()
         self.label_status["text"]="Fetching Episodes' List..."
 
+    def download_using_idm_single_episode(self,episode_name = None):
+        if episode_name is None:
+            episode_name = self.episodes_list.get(ANCHOR)
+        php_url = tree.make_video_url_ready(episode_name)
+        video_url = tree.get_playlist_m3u8(php_url)
+        if ("redirector" in video_url) or ("vidstreaming" in video_url):
+            program_path = os.path.dirname(os.path.realpath(__file__))
+            idman_param_list = ["idman","/n","/d",video_url,"/p",os.path.join(program_path,"-".join(episode_name.split("-")[:-2])),"/f",episode_name+".mp4"]
+            self.label_download_status["text"] = episode_name+"\n sent to IDM."
+            call_idm = subprocess.Popen(idman_param_list)
+        else:
+            self.label_download_status["text"]="The selected episode\ncannot be downloaded"
 
     def watch_in_browser(self):
         if self.current_php_url != "":
@@ -141,28 +192,34 @@ class window_main(windows):
         for _ in matched_results_formatted:
             self.matched_list.insert(END,_)
 
-        
+
+    
     def fire_list_box_selected(self,event):
-        self.episodes_list.delete(0,'end')
-        url = tree.global_head_url + self.matched_list.get(ANCHOR)
-        all_episodes = tree.get_all_episodes(url)
-        episodes_list = [line.split("/")[-1] for line in all_episodes]
+        episodes_list = self.get_episodes()
         episodes_list.reverse()
+        self.episodes_list.delete(0,'end')
         for _ in episodes_list:
             self.episodes_list.insert(END,_)
         self.label_status["text"]="Fetched All Episodes Successfully!"
+
+    def get_episodes(self,start=None,end=None):
+        url = tree.global_head_url + self.matched_list.get(ANCHOR)
+        all_episodes = tree.get_all_episodes(url,start,end)
+        episodes_list = [line.split("/")[-1] for line in all_episodes]
+        return episodes_list
+    
         
     def fire_episodes_list_box_selected(self,event):
         php_url = tree.make_video_url_ready(self.episodes_list.get(ANCHOR))
         self.current_php_url = php_url
         self.php_link_entry.delete(0,END)
         self.php_link_entry.insert(0,php_url)
+        self.watch_in_browser_button["state"]= "normal"
         video_url = tree.get_playlist_m3u8(php_url)
         self.current_video_url = video_url
         self.video_link_entry.delete(0,END)
         self.video_link_entry.insert(0,video_url)
         self.label_status["text"]="Fetched Video Url Successfully!"
-        self.watch_in_browser_button["state"]= "normal"
         self.watch_in_vlc_button["state"] = "normal" 
         
     def see_if_the_video_can_be_played(self):

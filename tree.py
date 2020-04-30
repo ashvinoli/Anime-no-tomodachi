@@ -86,12 +86,16 @@ def get_ALL_anime_list():
         my_dict = my_dict + temp_dict
     return my_dict
 
-def get_all_episodes(url):
-    global global_url
+def get_all_episodes(url,start=None,end=None):
+    global global_url 
     episode_url_list = []
     largest = num_of_episodes(url)
-    for i in range(1,largest+1):
-        episode_url_list.append(global_url+url.split("/")[-1]+"-episode-"+str(i))
+    if start is None:
+         start = 1
+    if end is None:
+         end = largest
+    for i in range(start,end+1):
+        episode_url_list.append((global_url+url.split("/")[-1]+"-episode-"+str(i)).replace("\n",""))
     return episode_url_list
 
 def num_of_episodes(url):
