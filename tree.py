@@ -144,7 +144,14 @@ def get_playlist_m3u8(end_url):
      try:
           m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
      except:
-          m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
+          try:
+               m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
+          except:
+               target_div = my_main_page.find('div',{'class':'videocontent'}).findChildren("script")
+               text = ""
+               for scr in target_div:
+                    text += scr.text
+               m3u8 = re.findall('file:\s\'(.*?)\'',text)[0]
      write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
      return m3u8
 
