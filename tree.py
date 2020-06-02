@@ -81,9 +81,16 @@ def get_ALL_anime_list():
     global global_url
     url = global_url+"anime-list.html?page="
     my_dict = []
-    for i in range(1,55):
+    i=1
+    while (True):
         temp_dict = get_anime_list(url+str(i))
+        length = len(temp_dict)
+        print("Fetched animes from page:",i, "Total animes in this page:",length,"     ",end="\r")
+        if length==0:
+            print("\nFetching Complete.")
+            break
         my_dict = my_dict + temp_dict
+        i+=1
     return my_dict
 
 def get_all_episodes(url,start=None,end=None):
@@ -134,6 +141,7 @@ def prepare_master_file():
 def save_anime_list():
      all_anime = get_ALL_anime_list()
      temp_file = open("all_animes.txt","w")
+     print("Writing to file...")
      for anime in all_anime:
           temp_file.write(anime+ "\n")
      temp_file.close()
@@ -387,5 +395,5 @@ if __name__ == "__main__":
           save_anime_list()
           print("The anime list has been updated successfully!")
      except:
-          print("Some error occured!!!! I have no idea what type, perhaps you might want to see your internet connection")
+          print("Some error occured! Perhaps you might want to see your internet connection")
     
