@@ -5,6 +5,7 @@ import webbrowser
 import os
 import subprocess
 import time
+import json
 
 global_url = "https://www10.gogoanime.io/"
 global_head_url = "https://www10.gogoanime.io/category/"
@@ -148,18 +149,24 @@ def save_anime_list():
 
 def get_playlist_m3u8(end_url):
      #returns the main m3u8
-     my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
-     try:
-          m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
-     except:
-          try:
-               m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
-          except:
-               target_div = my_main_page.find('div',{'class':'videocontent'}).findChildren("script")
-               text = ""
-               for scr in target_div:
-                    text += scr.text
-               m3u8 = re.findall('file:\s\'(.*?)\'',text)[0]
+     #my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
+     #try:
+     #     m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
+     #except:
+     #     try:
+     #          m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
+     #     except:
+     #          target_div = my_main_page.find('div',{'class':'videocontent'}).findChildren("script")
+     #          text = ""
+     #          for scr in target_div:
+     #               text += scr.text
+     #          m3u8 = re.findall('file:\s\'(.*?)\'',text)[0]
+     #write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
+     #return m3u8
+     ajax_url = "https://vidstreaming.io/ajax.php?"+end_url.split("?")[1]
+     content = requests.get(ajax_url).text
+     parsed_content = json.loads(content)
+     m3u8=parsed_content['source_bk'][0]['file']
      write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
      return m3u8
 
