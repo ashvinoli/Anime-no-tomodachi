@@ -8,9 +8,11 @@ import subprocess
 
 class window_main(windows):
     def __init__(self,title="My window",geometry="800x800"):
-        super().__init__(title,geometry)
         self.current_video_url=""
         self.current_php_url = ""
+        self.episodes_list_length = 0
+        super().__init__(title,geometry)
+        
         
         
     def define_frames(self):
@@ -118,9 +120,19 @@ class window_main(windows):
     
     def download_range(self,all_of_them):
         if all_of_them is None:
-            start = int(self.start_episode_number_entry.get())
-            end = int(self.end_episode_number_entry.get())
-            episodes_list = self.get_episodes(start,end)
+            start = self.start_episode_number_entry.get()
+            end = self.end_episode_number_entry.get()
+            if start.isnumeric() and end.isnumeric():
+                start = int(start)
+                end = int(end)
+                if start >=1 and end<=self.episodes_list_length:
+                    episodes_list = self.get_episodes(start,end)
+                else:
+                    self.label_download_status["text"]="Given download range invalid. See episodes list."
+                    return None
+            else:
+                self.label_download_status["text"]="Given download range invalid. See episodes list."
+                return None
         else:
             episodes_list = self.get_episodes()
         self.label_download_status["text"]="Download Episodes List Fetched! Will Download Now..."
@@ -170,14 +182,16 @@ class window_main(windows):
         video_url = tree.get_playlist_m3u8(php_url)
         if ("redirector" in video_url) or ("vidstreaming" in video_url):
             program_path = os.path.dirname(os.path.realpath(__file__))
-            save_location = os.path.join(program_path,"-".join(episode_name.split("-")[:-2]))
+            series_name = "-".join(episode_name.split("-")[:-2])
+            save_location = os.path.join(program_path,series_name)
             episode = episode_name+".mp4"
             if os.name=="nt":
                 idman_param_list = ["idman","/n","/d",video_url,"/p",save_location,"/f",episode]
                 self.label_download_status["text"] = episode_name+" sent to IDM."
                 call_idm = subprocess.Popen(idman_param_list)
             elif os.name=="posix":
-                wget_param_list = ["wget","-P",save_location,"-O",episode,"-c",video_url]
+                subprocess.run(["mkdir","-p",series_name])
+                wget_param_list = ["wget","-O","./"+series_name+"/"+episode,"-c",video_url]
                 self.label_download_status["text"] = episode_name+" sent to Wget."
                 call_wget = subprocess.run(wget_param_list)
                 return_code=call_wget.returncode
@@ -217,6 +231,7 @@ class window_main(windows):
     
     def fire_list_box_selected(self,event):
         episodes_list = self.get_episodes()
+        self.episodes_list_length = len(episodes_list)
         episodes_list.reverse()
         self.episodes_list.delete(0,'end')
         for _ in episodes_list:
