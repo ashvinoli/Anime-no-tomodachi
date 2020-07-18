@@ -131,7 +131,10 @@ class window_main(windows):
         thread_name = self.episodes_list.get(ANCHOR)
         self.threads[thread_name]=threading.Thread(target=self.download_using_idm_single_episode)
         self.threads[thread_name].start()
-        self.label_download_status["text"]="Downloading in IDman.."
+        if os.name=="nt":
+            self.label_download_status["text"]="Downloading in IDman.."
+        elif os.name=="posix":
+            self.label_download_status["text"]="Downloading in Wget.."
         
     
     def watch_in_vlc_buffer(self):
@@ -167,9 +170,27 @@ class window_main(windows):
         video_url = tree.get_playlist_m3u8(php_url)
         if ("redirector" in video_url) or ("vidstreaming" in video_url):
             program_path = os.path.dirname(os.path.realpath(__file__))
-            idman_param_list = ["idman","/n","/d",video_url,"/p",os.path.join(program_path,"-".join(episode_name.split("-")[:-2])),"/f",episode_name+".mp4"]
-            self.label_download_status["text"] = episode_name+" sent to IDM."
-            call_idm = subprocess.Popen(idman_param_list)
+            save_location = os.path.join(program_path,"-".join(episode_name.split("-")[:-2]))
+            episode = episode_name+".mp4"
+            if os.name=="nt":
+                idman_param_list = ["idman","/n","/d",video_url,"/p",save_location,"/f",episode]
+                self.label_download_status["text"] = episode_name+" sent to IDM."
+                call_idm = subprocess.Popen(idman_param_list)
+            elif os.name=="posix":
+                wget_param_list = ["wget","-P",save_location,"-O",episode,"-c",video_url]
+                self.label_download_status["text"] = episode_name+" sent to Wget."
+                call_wget = subprocess.run(wget_param_list)
+                return_code=call_wget.returncode
+                if return_code==0:
+                    success_string = episode_name+" successfully downloaded!.\n"
+                    self.label_download_status["text"]=success_string
+                    with open("downloaded_episodes_list.txt","a") as download_file:
+                        download_file.write(success_string)
+                else:
+                    failed_string = episode_name+" failed to download!.\n"
+                    self.label_download_status["text"]=failed_string
+                    with open("downloaded_episodes_list.txt","a") as download_file:
+                        download_file.write(failed_string)
         else:
             self.label_download_status["text"]="The selected episode\ncannot be downloaded"
 
