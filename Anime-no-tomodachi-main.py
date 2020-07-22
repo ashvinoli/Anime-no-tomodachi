@@ -223,7 +223,11 @@ class window_main(windows):
         self.matched_list.delete(0,'end')
         formatted_anime_name = tree.format_search_query(self.anime_entry.get())
         all_matched_results = tree.search_for_anime(formatted_anime_name)
-        matched_results_formatted = [line.split("/")[-1] for line in all_matched_results]
+        if len(all_matched_results)==0:
+            matched_from_server = tree.let_server_search(formatted_anime_name)
+            matched_results_formatted = [line.split("/")[-1] for line in matched_from_server]
+        else:   
+            matched_results_formatted = [line.split("/")[-1] for line in all_matched_results]
         for _ in matched_results_formatted:
             self.matched_list.insert(END,_)
 

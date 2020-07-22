@@ -71,12 +71,22 @@ def get_anime_list(url):
     global global_url
     all_anime = []
     my_main_page = BeautifulSoup(requests.get(url).text,"html.parser")
-    all_devs = my_main_page.findAll("div",{"class":"anime_list_body"})
+    if "search.html?keyword=" in url:
+         all_devs = my_main_page.findAll("div",{"class":"last_episodes"})
+    else:    
+         all_devs = my_main_page.findAll("div",{"class":"anime_list_body"})
     for dev in all_devs:
         anime_list = dev.findAll("a")
         for anime in anime_list:
             all_anime.append(global_url+anime.get("href"))
     return all_anime
+
+def let_server_search(keywords):
+     global global_url
+     search_query_url = global_url+"search.html?keyword="+keywords
+     results = get_anime_list(search_query_url)
+     results = list(dict.fromkeys(results))
+     return results
 
 def get_ALL_anime_list():
     global global_url
