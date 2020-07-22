@@ -228,6 +228,8 @@ class window_main(windows):
             matched_results_formatted = [line.split("/")[-1] for line in matched_from_server]
         else:   
             matched_results_formatted = [line.split("/")[-1] for line in all_matched_results]
+        if len(matched_results_formatted)==0:
+            self.label_status["text"]="No match found."
         for _ in matched_results_formatted:
             self.matched_list.insert(END,_)
 

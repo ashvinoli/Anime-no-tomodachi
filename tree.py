@@ -85,6 +85,8 @@ def let_server_search(keywords):
      global global_url
      search_query_url = global_url+"search.html?keyword="+keywords
      results = get_anime_list(search_query_url)
+     if len(results)==1:
+          return []
      results = list(dict.fromkeys(results))
      return results
 
