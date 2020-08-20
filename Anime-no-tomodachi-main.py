@@ -180,7 +180,7 @@ class window_main(windows):
             episode_name = self.episodes_list.get(ANCHOR)
         php_url = tree.make_video_url_ready(episode_name)
         video_url = tree.get_playlist_m3u8(php_url)
-        if ("redirector" in video_url) or ("vidstreaming" in video_url):
+        if ("redirector" in video_url) or ("vidstreaming" in video_url) or video_url.endswith(".mp4"):
             program_path = os.path.dirname(os.path.realpath(__file__))
             series_name = "-".join(episode_name.split("-")[:-2])
             save_location = os.path.join(program_path,series_name)
