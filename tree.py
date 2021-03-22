@@ -20,6 +20,34 @@ default_mode = None
 log_file = open("error_log.txt","w")
 log_file.close()
 
+def get_anime_name_only(anime_name):
+     return "-".join(anime_name.split("-")[:-2])
+
+def get_anime_episode_only(anime_name):
+     return anime_name.split("-")[-1]
+
+def get_anime_plus_one(anime_name):
+     anime_front = "-".join(anime_name.split("-")[:-1])
+     anime_episode = str(int(anime_name.split("-")[-1])+1)
+     return anime_front + "-" + anime_episode
+     
+def save_anime_progress(anime_name):
+     file_name = "Anime_progress.txt"
+     temp_name = open("Temp.txt",'w')
+     if os.path.exists(file_name):          
+          with open(file_name,'r') as f:
+               for line in f:
+                    if not(get_anime_name_only(anime_name) in line) and line.strip() != "":
+                         temp_name.write(line+"\n")
+          temp_name.write(anime_name+"\n")
+          temp_name.close()
+          os.remove(file_name)
+          os.rename("Temp.txt",file_name)
+     else:
+          x = open(file_name,'w')
+          x.write(anime_name)
+          x.close()
+
 def open_log_file():
      global log_file
      log_file = open("error_log.txt","a")

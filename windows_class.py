@@ -27,7 +27,7 @@ class windows:
         self.define_radio_buttons()
         self.define_sliders()
         self.define_check_buttons()
-        self.define_drop_down_boxes()
+        self.define_combo_boxes()
         self.define_list_boxes()
         self.define_scroll_bars()
         
@@ -39,7 +39,7 @@ class windows:
         self.pack_radio_buttons()
         self.pack_sliders()
         self.pack_check_buttons()
-        self.pack_drop_down_boxes()
+        self.pack_combo_boxes()
         self.pack_list_boxes()
         self.pack_scroll_bars()
 
@@ -79,6 +79,7 @@ class windows:
     def pack_entries(self):
         pass
 
+    
     #In python radio_buttons are associated with variables. Clicking a particular radio-button changes the value of that variable. The value is assigned during radio button definition. For all radio buttons which share the same variables only one of them can be checked which makes sense.
     def define_radio_buttons(self):
         pass
@@ -106,11 +107,10 @@ class windows:
     def pack_check_buttons(self):
         pass    
 
-    #Drop down boxes are "OptionMenu" in tkinter
-    def define_drop_down_boxes(self):
+    def define_combo_boxes(self):
         pass
     
-    def pack_drop_down_boxes(self):
+    def pack_combo_boxes(self):
         pass    
 
     #Listboxes are "Listbox" in tkinter
