@@ -34,7 +34,9 @@ class window_main(windows):
         
     def define_combo_boxes(self):
         animes = self.get_watched_animes()
-        self.my_anime_list_combo = ttk.Combobox(self.resume_anime_frame,width = 90,values =animes )
+        self.my_anime_list_combo = ttk.Combobox(self.resume_anime_frame,width = 90,values = sorted(animes))
+
+        #put last watched anime in the combo box
         if len(animes)!=0:
             self.my_anime_list_combo.set(animes[-1])
             
@@ -42,7 +44,6 @@ class window_main(windows):
         if os.path.exists("Anime_progress.txt"):
             with open("Anime_progress.txt","r") as f:
                 all_animes = [i.strip() for i in f if i.strip()!=""]
-            all_animes = sorted(all_animes)
         else:
             file = open("Anime_progress.txt","w")
             file.close()
