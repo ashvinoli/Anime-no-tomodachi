@@ -186,6 +186,7 @@ def save_anime_list():
      for anime in all_anime:
           temp_file.write(anime+ "\n")
      temp_file.close()
+     print("Writing completed!")
 
 def get_playlist_m3u8(end_url):
      #returns the main m3u8

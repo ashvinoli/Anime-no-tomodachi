@@ -6,6 +6,7 @@ import tree
 import webbrowser
 import os
 import subprocess
+from datetime import date
 
 class window_main(windows):
     def __init__(self,title="My window",geometry="800x800"):
@@ -15,7 +16,29 @@ class window_main(windows):
         self.anime_link_buffer = {}
         super().__init__(title,geometry)
 
-        
+    def update_anime_list(self):
+        last_updated = "Last_Updated.txt"
+        if os.path.exists(last_updated):
+            with open(last_updated,"r") as f:
+                last_date = f.readline().rstrip().split("-")
+                last_date = [int(i) for i in last_date]
+                year,month,day = last_date
+                last_date = date(year,month,day)
+                today = date.today()
+                gap = today-last_date
+                
+                #update in five days
+                if gap.days > 5:
+                    tree.save_anime_list()
+            f = open(last_updated,"w")
+            f.write(str(today.year) +"-"+ str(today.month) +"-"+ str(today.day))
+            f.close()
+        else:           
+            tree.save_anime_list()
+            today = date.today()
+            f = open(last_updated,"w")
+            f.write(str(today.year) +"-"+ str(today.month) +"-"+ str(today.day))
+            f.close()
         
     def define_frames(self):
         self.matched_frame = LabelFrame(self.window,text = "Matched Results",padx=5,pady=2)
@@ -23,7 +46,11 @@ class window_main(windows):
         self.buttons_bundle_frame = LabelFrame(self.window,text = "Download/Watch",padx=5,pady=5)
         self.start_end_frame = LabelFrame(self.buttons_bundle_frame,padx=2)
         self.resume_anime_frame = LabelFrame(self.window,text = "Resume Watching",padx=5,pady=5)
-        
+
+        #Run update routine after frames are packed
+        self.threads["Update_anime"] = threading.Thread(target = self.update_anime_list)
+        self.threads["Update_anime"].start()
+  
     def pack_frames(self):
         self.matched_frame.grid(row=2,column=1)
         self.episodes_list_frame.grid(row=2,column=2)
