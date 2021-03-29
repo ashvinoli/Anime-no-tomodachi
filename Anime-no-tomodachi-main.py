@@ -33,12 +33,20 @@ class window_main(windows):
 
         
     def define_combo_boxes(self):
-        self.my_anime_list_combo = ttk.Combobox(self.resume_anime_frame,width = 90,values = self.get_watched_animes())
-
+        animes = self.get_watched_animes()
+        self.my_anime_list_combo = ttk.Combobox(self.resume_anime_frame,width = 90,values =animes )
+        if len(animes)!=0:
+            self.my_anime_list_combo.set(animes[-1])
+            
     def get_watched_animes(self):
-        with open("Anime_progress.txt","r") as f:
-            all_animes = [i.strip() for i in f if i.strip()!=""]
-        all_animes = sorted(all_animes)
+        if os.path.exists("Anime_progress.txt"):
+            with open("Anime_progress.txt","r") as f:
+                all_animes = [i.strip() for i in f if i.strip()!=""]
+            all_animes = sorted(all_animes)
+        else:
+            file = open("Anime_progress.txt","w")
+            file.close()
+            all_animes = []      
         return all_animes
     
     def pack_combo_boxes(self):
@@ -72,7 +80,7 @@ class window_main(windows):
         self.download_range_button["state"] = "disabled"
         self.previous_button = Button(self.resume_anime_frame,text = "Previous",width = width-20,command = lambda:self.previous_next_episode(-1))
         self.next_button = Button(self.resume_anime_frame,text = "Next",width = width-20,command =lambda:self.previous_next_episode(1))
-        
+        self.resume_button = Button(self.resume_anime_frame,text = "Resume",width = width-20,command =lambda:self.previous_next_episode(0))
     def pack_buttons(self):
         self.download_selected_episode_button.pack()
         self.download_all_episodes_button.pack()
@@ -80,7 +88,8 @@ class window_main(windows):
         self.watch_in_vlc_button.grid(row=4,column=3)
         self.download_range_button.grid(row=1,column=4)
         self.previous_button.grid(row=1,column=2)
-        self.next_button.grid(row=1,column=3)
+        self.resume_button.grid(row=1,column=3)
+        self.next_button.grid(row=1,column=4)
         
     def define_entries(self):
         self.anime_entry = Entry(self.window,width=82)
@@ -292,6 +301,7 @@ class window_main(windows):
     def fire_episodes_list_box_selected(self,event,anime_name_episode = None):
         if anime_name_episode is None:
             anime_name_episode = self.episodes_list.get(ANCHOR)
+            self.my_anime_list_combo.set(anime_name_episode)
         #Save progress to file
         tree.save_anime_progress(anime_name_episode)
         
