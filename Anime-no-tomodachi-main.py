@@ -307,7 +307,7 @@ class window_main(windows):
         tree.save_anime_progress(anime_name_episode)
         
         #Reload combo box with updated list after new episode has been added to list
-        self.my_anime_list_combo["values"] = self.get_watched_animes()
+        self.my_anime_list_combo["values"] = sorted(self.get_watched_animes())
         
         if anime_name_episode in self.anime_link_buffer:
             self.php_link_entry.delete(0,END)
