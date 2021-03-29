@@ -32,12 +32,13 @@ class window_main(windows):
         self.start_end_frame.pack()
 
         
-    def define_combo_boxes(self):    
+    def define_combo_boxes(self):
         self.my_anime_list_combo = ttk.Combobox(self.resume_anime_frame,width = 90,values = self.get_watched_animes())
 
     def get_watched_animes(self):
-        with open("Anime_progress.txt") as f:
+        with open("Anime_progress.txt","r") as f:
             all_animes = [i.strip() for i in f if i.strip()!=""]
+        all_animes = sorted(all_animes)
         return all_animes
     
     def pack_combo_boxes(self):
@@ -69,7 +70,8 @@ class window_main(windows):
         self.download_all_episodes_button["state"] = "disabled"
         self.download_range_button = Button(self.start_end_frame,text = "Download Range",command = self.download_range_buffer)
         self.download_range_button["state"] = "disabled"
-
+        self.previous_button = Button(self.resume_anime_frame,text = "Previous",width = width-20,command = lambda:self.previous_next_episode(-1))
+        self.next_button = Button(self.resume_anime_frame,text = "Next",width = width-20,command =lambda:self.previous_next_episode(1))
         
     def pack_buttons(self):
         self.download_selected_episode_button.pack()
@@ -77,7 +79,8 @@ class window_main(windows):
         self.watch_in_browser_button.grid(row=3,column=3)
         self.watch_in_vlc_button.grid(row=4,column=3)
         self.download_range_button.grid(row=1,column=4)
-
+        self.previous_button.grid(row=1,column=2)
+        self.next_button.grid(row=1,column=3)
         
     def define_entries(self):
         self.anime_entry = Entry(self.window,width=82)
@@ -303,25 +306,39 @@ class window_main(windows):
             self.video_link_entry.insert(0,self.anime_link_buffer[anime_name_episode][1])
             self.label_status["text"]="Fetched Video Url Successfully!"
             self.watch_in_vlc_button["state"] = "normal"
+            self.current_video_url = self.anime_link_buffer[anime_name_episode][1]
+
+            #play vlc before fetching next
+            self.watch_in_vlc_buffer()
+            self.get_one_plus(anime_name_episode)            
         else:
             self.prepare_anime(anime_name_episode)
-        
+
+
+            
     def prepare_anime(self,anime_name_episode):
         php_url = self.get_php_url(anime_name_episode)
         video_url = self.get_video_url(php_url)
         self.anime_link_buffer[anime_name_episode] = []
         self.anime_link_buffer[anime_name_episode].extend([php_url,video_url])
 
+        #play vlc before fetching next
+        self.watch_in_vlc_buffer()
+        self.get_one_plus(anime_name_episode)
+        
+    def get_one_plus(self,anime_name_episode):
         #Save +1 anime so that next time we don't need to wait for link fetching
         new_one = tree.get_anime_plus_one(anime_name_episode)
-        episode_number = tree.get_anime_episode_only(new_one)
-        if int(episode_number) <= self.get_episodes_count(tree.get_anime_name_only(new_one)):
-            php_url = self.get_php_url(new_one,show=False)
-            video_url = self.get_video_url(php_url,show=False)
-            self.anime_link_buffer[new_one] = []
-            self.anime_link_buffer[new_one].extend([php_url,video_url])
-        else:
-            self.label_status["text"]="Anime list exceeded while fetching next episode link!"
+        if new_one not in self.anime_link_buffer:
+            episode_number = tree.get_anime_episode_only(new_one)
+            if int(episode_number) <= self.get_episodes_count(tree.get_anime_name_only(new_one)):
+                php_url = self.get_php_url(new_one,show=False)
+                video_url = self.get_video_url(php_url,show=False)
+                self.anime_link_buffer[new_one] = []
+                self.anime_link_buffer[new_one].extend([php_url,video_url])
+                self.label_status["text"]="Next episodes link also fetched!"
+            else:
+                self.label_status["text"]="Anime list exceeded while fetching next episode link!"
 
     def get_php_url(self,anime_name_episode,show = True):
         php_url = tree.make_video_url_ready(anime_name_episode)
@@ -345,6 +362,19 @@ class window_main(windows):
     def see_if_the_video_can_be_played(self):
         if self.current_video_url != "":
             tree.check_for_ways_to_play(self.current_video_url)
+
+    def previous_next_episode(self,inc):
+        anime = self.my_anime_list_combo.get()
+        if anime != "":
+            anime_name = tree.get_anime_name_only(anime)
+            episode_number = tree.get_anime_episode_only(anime)
+            next_episode_number = int(episode_number)+inc
+            if next_episode_number > 0:
+                next_one = anime_name + "-episode-" + str(next_episode_number)
+                self.my_anime_list_combo.set(next_one)
+                self.threads["Next_or_prev"] = threading.Thread(target=self.fire_episodes_list_box_selected,args = ("",next_one))
+                self.threads["Next_or_prev"].start()
+
             
 if __name__ == "__main__":
     my_main_window = window_main("Anime-no-tomodachi","885x320")
