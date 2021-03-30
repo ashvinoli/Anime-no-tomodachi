@@ -408,9 +408,16 @@ class window_main(windows):
         anime = self.my_anime_list_combo.get()
         if anime != "":
             anime_name = tree.get_anime_name_only(anime)
-            episode_number = tree.get_anime_episode_only(anime)
+            episode_number = tree.get_anime_episode_only(anime)                
             next_episode_number = int(episode_number)+inc
             if next_episode_number > 0:
+                if inc==0:
+                    self.label_status["text"]="Resuming. Please wait..."
+                elif inc==1:
+                    self.label_status["text"]="Next episode playing in a moment. Please wait..."
+                else:
+                    self.label_status["text"]="Previous episode playing in a moment. Please wait..."
+                    
                 next_one = anime_name + "-episode-" + str(next_episode_number)
                 self.my_anime_list_combo.set(next_one)
                 self.threads["Next_or_prev"] = threading.Thread(target=self.fire_episodes_list_box_selected,args = ("",next_one))
