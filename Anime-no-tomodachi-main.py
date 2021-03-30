@@ -31,13 +31,13 @@ class window_main(windows):
                 if gap.days > 5:
                     tree.save_anime_list()
             f = open(last_updated,"w")
-            f.write(str(today.year) +"-"+ str(today.month) +"-"+ str(today.day))
+            f.write(today.__str__())
             f.close()
         else:           
             tree.save_anime_list()
             today = date.today()
             f = open(last_updated,"w")
-            f.write(str(today.year) +"-"+ str(today.month) +"-"+ str(today.day))
+            f.write(today.__str__())
             f.close()
         
     def define_frames(self):
@@ -284,8 +284,11 @@ class window_main(windows):
     def watch_in_vlc(self):
         if self.current_video_url !="":
             self.label_status["text"] = "Video will now play\n in VLC media player."
-            tree.play_video_in_vlc(self.current_video_url)
-            self.label_status["text"]="Media Playing Terminated."
+            result = tree.play_video_in_vlc(self.current_video_url)
+            if result:
+                self.label_status["text"]="Media Playing Terminated."
+            else:
+                self.label_status["text"]="VLC media player not found. Please install it."
             
     def search_button_clicked(self,button):
         self.matched_list.delete(0,'end')

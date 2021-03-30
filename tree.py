@@ -81,8 +81,13 @@ def write_to_file(link):
 
 def play_video_in_vlc(video_link):
      global messenger
-     subprocess.run(["vlc",video_link])
+     vlc_location = os.path.join(os.environ["PROGRAMFILES"],"VideoLAN","VLC","vlc.exe")
+     if os.path.exists(vlc_location):
+          subprocess.run([vlc_location,video_link])
+          return True
+     return False
 
+          
      
 def check_for_ways_to_play(video_link):
      if "redirector" in video_link:
