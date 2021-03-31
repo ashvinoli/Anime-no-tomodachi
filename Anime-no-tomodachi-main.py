@@ -348,6 +348,7 @@ class window_main(windows):
             self.label_status["text"]="Fetched Video Url Successfully!"
             self.watch_in_vlc_button["state"] = "normal"
             self.current_video_url = self.anime_link_buffer[anime_name_episode][1]
+            self.current_php_url = self.anime_link_buffer[anime_name_episode][0]
 
             #play vlc before fetching next
             self.watch_in_vlc_buffer()
@@ -360,6 +361,8 @@ class window_main(windows):
     def prepare_anime(self,anime_name_episode):
         php_url = self.get_php_url(anime_name_episode)
         video_url = self.get_video_url(php_url)
+        self.current_php_url = php_url
+        self.current_video_url = video_url
         self.anime_link_buffer[anime_name_episode] = []
         self.anime_link_buffer[anime_name_episode].extend([php_url,video_url])
 
@@ -383,7 +386,7 @@ class window_main(windows):
 
     def get_php_url(self,anime_name_episode,show = True):
         php_url = tree.make_video_url_ready(anime_name_episode)
-        self.current_php_url = php_url
+
         if show:
             self.php_link_entry.delete(0,END)
             self.php_link_entry.insert(0,php_url)
@@ -392,7 +395,7 @@ class window_main(windows):
     
     def get_video_url(self,php_url,show=True):
         video_url = tree.get_playlist_m3u8(php_url)
-        self.current_video_url = video_url
+
         if show:
             self.video_link_entry.delete(0,END)
             self.video_link_entry.insert(0,video_url)
