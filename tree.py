@@ -194,6 +194,8 @@ def save_anime_list():
      print("Writing completed!")
 
 def get_playlist_m3u8(end_url):
+     my_main_page = BeautifulSoup(requests.get(end_url.replace("streaming","loadserver")).text,"html.parser")
+     m3u8 = "https:"+my_main_page.findAll('script')[2].string.split(":")[3].split("'")[0]
      #returns the main m3u8
      #my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
      #try:
@@ -209,10 +211,10 @@ def get_playlist_m3u8(end_url):
      #          m3u8 = re.findall('file:\s\'(.*?)\'',text)[0]
      #write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
      #return m3u8
-     ajax_url = "https://vidstreaming.io/ajax.php?"+end_url.split("?")[1]
-     content = requests.get(ajax_url).text
-     parsed_content = json.loads(content)
-     m3u8=parsed_content['source_bk'][0]['file']
+     #ajax_url = "https://vidstreaming.io/ajax.php?"+end_url.split("?")[1]
+     #content = requests.get(ajax_url).text
+     #parsed_content = json.loads(content)
+     #m3u8=parsed_content['source_bk'][0]['file']
      write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
      return m3u8
 
