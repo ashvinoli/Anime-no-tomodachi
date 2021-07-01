@@ -7,8 +7,8 @@ import subprocess
 import time
 import json
 
-global_url = "https://www10.gogoanime.io/"
-global_head_url = "https://www10.gogoanime.io/category/"
+global_url = "https://www.gogoanime.pe/"
+global_head_url = "https://www.gogoanime.pe/category/"
 headers = {"Referrer Policy":"unsafe-url",\
                   "Origin":"https://vidstreaming.io",\
                   "Referer":"https://vidstreaming.io/",\
@@ -82,10 +82,17 @@ def write_to_file(link):
 def play_video_in_vlc(video_link):
      global messenger
      vlc_location = os.path.join(os.environ["PROGRAMFILES"],"VideoLAN","VLC","vlc.exe")
-     if os.path.exists(vlc_location):
-          subprocess.run([vlc_location,video_link])
-          return True
-     return False
+     if os.name == 'posix':
+          try:
+               subprocess.run(['vlc',video_link])
+               return True
+          except:
+               return False                         
+     else:
+          if os.path.exists(vlc_location):
+               subprocess.run([vlc_location,video_link])
+               return True
+          return False
 
           
      
