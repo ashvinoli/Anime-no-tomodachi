@@ -81,7 +81,8 @@ def write_to_file(link):
 
 def play_video_in_vlc(video_link):
      global messenger
-     vlc_location = os.path.join(os.environ["PROGRAMFILES"],"VideoLAN","VLC","vlc.exe")
+     vlc_location_one = os.path.join(os.environ["PROGRAMFILES"],"VideoLAN","VLC","vlc.exe")
+     vlc_location_two = os.path.join(os.environ["PROGRAMFILES(x86)"],"VideoLAN","VLC","vlc.exe")
      if os.name == 'posix':
           try:
                subprocess.run(['vlc',video_link])
@@ -89,8 +90,11 @@ def play_video_in_vlc(video_link):
           except:
                return False                         
      else:
-          if os.path.exists(vlc_location):
-               subprocess.run([vlc_location,video_link])
+          if os.path.exists(vlc_location_one):
+               subprocess.run([vlc_location_one,video_link])
+               return True
+          elif os.path.exists(vlc_location_two):
+               subprocess.run([vlc_location_two,video_link])
                return True
           return False
 
@@ -201,29 +205,17 @@ def save_anime_list():
      print("Writing completed!")
 
 def get_playlist_m3u8(end_url):
-     my_main_page = BeautifulSoup(requests.get(end_url.replace("streaming","loadserver")).text,"html.parser")
-     m3u8 = "https:"+my_main_page.findAll('script')[2].string.split(":")[3].split("'")[0]
-     #returns the main m3u8
-     #my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
-     #try:
-     #     m3u8 = my_main_page.findAll("script")[3].text.split(";")[0].split("=")[-1].split("'")[1]
-     #except:
-     #     try:
-     #          m3u8 = re.search("[\'].*?[\']",my_main_page.findAll("script")[3].text.split(";")[3]).group(0).split("'")[1]
-     #     except:
-     #          target_div = my_main_page.find('div',{'class':'videocontent'}).findChildren("script")
-     #          text = ""
-     #          for scr in target_div:
-     #               text += scr.text
-     #          m3u8 = re.findall('file:\s\'(.*?)\'',text)[0]
-     #write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
-     #return m3u8
-     #ajax_url = "https://vidstreaming.io/ajax.php?"+end_url.split("?")[1]
-     #content = requests.get(ajax_url).text
-     #parsed_content = json.loads(content)
-     #m3u8=parsed_content['source_bk'][0]['file']
-     write_to_log_file("Playlist m3u8 for "+end_url+":\n",m3u8)
-     return m3u8
+     my_main_page = BeautifulSoup(requests.get(end_url).text,"html.parser")
+     more_servers = my_main_page.find("div",{'id':'list-server-more'})
+     list_item = more_servers.find('li',{'data-provider':'serverwithtoken'})
+     new_site = list_item['data-video']
+
+     second_page = BeautifulSoup(requests.get(new_site).text,"html.parser")
+     video_content = second_page.find('div',{'class':'videocontent'})
+     script = str(video_content.find('script'))
+     video_link = re.findall(r"https://.*?.mp4",script)[0]
+     write_to_log_file("Playlist m3u8 for "+end_url+":\n",video_link)
+     return video_link
 
 def get_child_m3u8(playlist_m3u8):
      #returns the qualities available
